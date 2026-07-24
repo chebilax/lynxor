@@ -25,6 +25,14 @@ Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub A
 go install github.com/xchebila/reposcan@v1.0.2   # or @latest, or a commit SHA
 ```
 
+**npm**, if you already have Node 18+ (no Go needed — downloads the matching precompiled binary on install):
+
+```bash
+npm install -g reposcan
+```
+
+See [npm/](npm/) and [ADR 0021](docs/decisions/0021-npm-distribution.md).
+
 **Precompiled binaries**: every tagged release publishes Linux/macOS/Windows (amd64/arm64) archives and a `checksums.txt` as GitHub Release assets, built via GoReleaser — see [releases](https://github.com/xchebila/reposcan/releases) and [ADR 0020](docs/decisions/0020-goreleaser.md).
 
 **From source**:

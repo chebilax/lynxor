@@ -1,0 +1,35 @@
+{
+  "name": "reposcan",
+  "version": "0.0.0",
+  "description": "A 10-second security sanity check for Git repositories -- committed secrets, exposed keys, risky Dockerfile patterns, CI/CD misconfigurations, and known-vulnerable dependencies. This package downloads the matching precompiled reposcan binary from GitHub Releases on install.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xchebila/reposcan.git",
+    "directory": "npm"
+  },
+  "homepage": "https://github.com/xchebila/reposcan",
+  "bugs": "https://github.com/xchebila/reposcan/issues",
+  "bin": {
+    "reposcan": "bin/reposcan.js"
+  },
+  "files": [
+    "bin",
+    "scripts"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}
