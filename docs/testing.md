@@ -116,13 +116,14 @@ Les 5 scénarios ci-dessous étaient une checklist manuelle jusqu'à l'ADR 0014 
 
 `docs/examples/reference-plugin.py` — écrit en Python, délibérément, pour valider honnêtement la promesse "le protocole n'a rien de spécifique à Go" plutôt que de la laisser comme une affirmation non vérifiée dans `docs/plugin-protocol.md`. Accepte un flag `--misbehave=timeout|crash|fatal|error` pour rejouer chacun des scénarios de défaillance ci-dessous à la demande — pas destiné aux vrais auteurs de plugins, uniquement à la suite de test.
 
-Six scénarios de référence à reproduire si on touche `analyzers/plugin` :
+Sept scénarios de référence à reproduire si on touche `analyzers/plugin` :
 1. Fonctionnement normal → le finding du plugin apparaît dans le rapport, avec l'`id` correctement préfixé par `plugin_name`.
 2. Erreur fatale au handshake (`--misbehave=fatal`) → plugin ignoré au chargement, scan continue normalement.
 3. Erreur non-fatale sur un fichier (`--misbehave=error`) → warning par fichier concerné, plugin reste actif pour les fichiers suivants.
 4. Timeout (`--misbehave=timeout`, le script dort 30s) → abandon après exactement 5s, pas de nouvelle tentative sur les fichiers suivants.
 5. Crash (`--misbehave=crash`, `sys.exit(1)`) → détecté immédiatement (EOF sur stdout), pas d'attente du timeout.
 6. Deux plugins en même temps, un qui crashe et un qui fonctionne → isolation confirmée, le crash de l'un n'affecte pas les findings de l'autre.
+7. `--plugin-arg reference-example:foo=bar` (ADR 0018) → le finding du plugin de référence affiche `context: configured args: {'foo': 'bar'}`, confirmé par un vrai run, pas seulement lu dans le protocole. Sans aucun `--plugin-arg`, ou avec un `--plugin-arg` adressé à un autre nom de plugin, le `context` reste vide — les deux vérifiés aussi.
 
 `--plugin` prend un chemin d'exécutable, pas une commande avec arguments (un vrai plugin est autonome, il n'a pas besoin de flags CLI) — pour tester chaque mode il faut donc un petit wrapper par mode plutôt que de passer `--misbehave=X` directement :
 
