@@ -95,7 +95,7 @@ Le corpus réel valide la vitesse et l'absence de faux positifs à grande échel
 
 ## Dependency Scanner : test contre l'API OSV.dev réelle, pas de mock
 
-`analyzers/dependencies` fait de vrais appels réseau (`--deps`) — validé contre la vraie API `api.osv.dev`, jamais mockée. Deux dépendances volontairement anciennes/vulnérables servent de fixtures de référence pour ce chemin de code : `golang.org/x/text@v0.3.0` (Go) et `urllib3==1.24.1` (Python), toutes deux avec plusieurs CVE connues et couvrant les trois cas de mapping de sévérité (`database_specific.severity` direct, heuristique CVSS, fallback Medium — voir `docs/decisions/0006-dependency-scanner-scope.md`).
+`analyzers/dependencies` fait de vrais appels réseau (`--deps`) — validé contre la vraie API `api.osv.dev`, jamais mockée. Trois dépendances volontairement anciennes/vulnérables servent de fixtures de référence pour ce chemin de code : `golang.org/x/text@v0.3.0` (Go), `urllib3==1.24.1` (Python), `lodash@4.17.4` (npm, depuis ADR 0019) — toutes avec plusieurs CVE connues et couvrant les trois cas de mapping de sévérité (`database_specific.severity` direct, heuristique CVSS, fallback Medium — voir `docs/decisions/0006-dependency-scanner-scope.md`).
 
 `gin` (57 dépendances) et `prometheus` (1075 dépendances sur 5 `go.sum`) du corpus servent aussi de test d'échelle réel pour ce chemin — c'est prometheus qui a révélé le plafond de batch OSV non documenté (1000 requêtes max) : sans le découpage en chunks, le check de dépendances échouait entièrement en silence sur ce repo, avec un message trompeur ("réseau indisponible").
 

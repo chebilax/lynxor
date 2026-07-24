@@ -51,7 +51,7 @@ By default, `scan` checks both the working tree and recent git history (secrets 
 
 (`--full-history` and `--no-history` are mutually exclusive — passing both is a usage error, not a silent override.)
 
-Dependency vulnerability checking (`go.sum`, `requirements.txt` against OSV.dev) is also off by default — it's the only check that needs the network:
+Dependency vulnerability checking (`go.sum`, `requirements.txt`, `package-lock.json` against OSV.dev) is also off by default — it's the only check that needs the network:
 
 ```bash
 ./reposcan scan . --deps   # check pinned dependencies against known vulnerabilities (requires network)
@@ -104,7 +104,7 @@ A plugin that crashes, times out (5s per file), or sends a malformed response is
 |---|---|---|
 | `--full-history` | off | No time budget on git history scanning; also sweeps dangling commits from deleted branches. Mutually exclusive with `--no-history`. |
 | `--no-history` | off | Skip git history scanning entirely, working tree only. Mutually exclusive with `--full-history`. |
-| `--deps` | off | Check `go.sum`/`requirements.txt` against OSV.dev — the only flag here that touches the network. |
+| `--deps` | off | Check `go.sum`/`requirements.txt`/`package-lock.json` against OSV.dev — the only flag here that touches the network. |
 | `--plugin <path>` | none | Run an external plugin executable alongside the built-in rules. Repeatable. |
 | `--format <cli\|json\|html>` | `cli` | Output format. `json` and `html` both still respect the exit-code-70 threshold below. |
 
@@ -243,7 +243,7 @@ Phase 4 — plugin system (`--plugin`): external detection rules run as a separa
 
 Phase 5 — reporting: `--format json` for machine-readable output, and `--format html` for a self-contained dashboard with a per-category score breakdown alongside the total. This closes vision.md's roadmap to v1.0.
 
-Post-v1.0 — a GitHub Action (see above) is the first item off [docs/roadmap-long-term.md](docs/roadmap-long-term.md): pure packaging around `diff`/`scan --format json`, no new CLI feature.
+Post-v1.0 — a GitHub Action (see above) is the first item off [docs/roadmap-long-term.md](docs/roadmap-long-term.md): pure packaging around `diff`/`scan --format json`, no new CLI feature. `--deps` also gained `package-lock.json` (npm), `lockfileVersion` 2/3 only (npm 7+) — `yarn.lock`/`pnpm-lock.yaml` are separate, deliberately deferred.
 
 See [vision.md](docs/vision.md) for the full v1.0 roadmap, [docs/roadmap-long-term.md](docs/roadmap-long-term.md) for what's planned after it, [docs/decisions/](docs/decisions/) for design rationale, [docs/testing.md](docs/testing.md) for the test corpus and exit criteria, and [docs/benchmarks.md](docs/benchmarks.md) for the timing history behind them.
 
