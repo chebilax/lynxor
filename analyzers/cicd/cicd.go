@@ -230,3 +230,18 @@ func CheckDependabot(repoRoot string) []core.Finding {
 
 	return []core.Finding{finding(noDependabotRule, ".github/dependabot.yml", 0)}
 }
+
+// DependabotAnalyzer adapts CheckDependabot to core.RepoAnalyzer, so cli/scan.go
+// can run it through the same generic list as githistory's analyzer instead
+// of calling it as a special case.
+type DependabotAnalyzer struct{}
+
+// NewDependabotAnalyzer mirrors the New() constructor convention every other
+// built-in analyzer in this project already uses (secrets.New(), docker.New()).
+func NewDependabotAnalyzer() *DependabotAnalyzer { return &DependabotAnalyzer{} }
+
+func (a *DependabotAnalyzer) Name() string { return "cicd.dependabot" }
+
+func (a *DependabotAnalyzer) Run(repoRoot string) ([]core.Finding, error) {
+	return CheckDependabot(repoRoot), nil
+}

@@ -161,6 +161,27 @@ func TestCheckDependabot(t *testing.T) {
 	}
 }
 
+// TestDependabotAnalyzer_ImplementsRepoAnalyzer confirms the core.RepoAnalyzer
+// adapter delegates to CheckDependabot correctly (already covered in depth
+// by TestCheckDependabot above) rather than re-testing every case here.
+func TestDependabotAnalyzer_ImplementsRepoAnalyzer(t *testing.T) {
+	root := t.TempDir()
+	mustMkdirAll(t, filepath.Join(root, ".github", "workflows"))
+	mustWriteFile(t, filepath.Join(root, ".github", "workflows", "ci.yml"), "jobs: {}")
+
+	a := NewDependabotAnalyzer()
+	if a.Name() != "cicd.dependabot" {
+		t.Errorf("Name() = %q, want cicd.dependabot", a.Name())
+	}
+	findings, err := a.Run(root)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(findings) != 1 || findings[0].ID != "cicd.no_dependabot" {
+		t.Errorf("got %+v, want one cicd.no_dependabot finding", findings)
+	}
+}
+
 func mustMkdirAll(t *testing.T, path string) {
 	t.Helper()
 	if err := os.MkdirAll(path, 0o755); err != nil {
