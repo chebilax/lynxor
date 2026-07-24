@@ -101,7 +101,7 @@ fails the whole scan.`,
 			if err != nil {
 				return fmt.Errorf("scan failed: %w", err)
 			}
-			findings = append(findings, cicd.CheckDependabot(path)...)
+			repoAnalyzers := []core.RepoAnalyzer{cicd.NewDependabotAnalyzer()}
 
 			deps := dependencies.Discover(path)
 			switch {
@@ -133,18 +133,19 @@ fails the whole scan.`,
 						}
 					}
 				}
-				result, err := githistory.Scan(path, opts)
+				repoAnalyzers = append(repoAnalyzers, githistory.NewAnalyzer(opts))
+			}
+
+			for _, ra := range repoAnalyzers {
+				raFindings, err := ra.Run(path)
 				switch {
 				case errors.Is(err, githistory.ErrNotAGitRepo):
 					// Not every scan target is a git checkout; working-tree
 					// scanning alone is still fully valid.
 				case err != nil:
-					fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  git history scan failed: %v\n", err)
+					fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  %s: %v\n", ra.Name(), err)
 				default:
-					findings = append(findings, result.Findings...)
-					if result.Truncated {
-						fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  git history scan stopped after %d commits (time budget) — some older history was not checked. Use --full-history for an exhaustive scan.\n", result.CommitsScanned)
-					}
+					findings = append(findings, raFindings...)
 				}
 			}
 

@@ -6,7 +6,9 @@ package githistory
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -267,6 +269,53 @@ func scanCommit(analyzer *secrets.Analyzer, c *object.Commit, skipTo bool) []cor
 		}
 	}
 	return findings
+}
+
+// Analyzer adapts Scan to core.RepoAnalyzer, so cli/scan.go can run it
+// through the same generic list as cicd.DependabotAnalyzer instead of
+// calling it as a special case. Options (FullHistory, Budget, OnProgress)
+// are bound once at construction, same as Scan's own opts parameter --
+// the RepoAnalyzer interface itself stays generic across every
+// implementation, none of them gets a parameter only it needs.
+type Analyzer struct {
+	opts Options
+}
+
+// NewAnalyzer mirrors the New() constructor convention every other
+// built-in analyzer in this project already uses (secrets.New(), docker.New()).
+func NewAnalyzer(opts Options) *Analyzer {
+	return &Analyzer{opts: opts}
+}
+
+func (a *Analyzer) Name() string { return "githistory" }
+
+// Run calls Scan and reports non-fatal diagnostics (a full-history scan's
+// periodic progress, a truncation warning) directly to os.Stderr, the same
+// convention analyzers/plugin/plugin.go and core.RunAnalyzer already use --
+// not a new warnings-return mechanism on core.RepoAnalyzer. ErrNotAGitRepo
+// is returned unchanged: whether "not a git repo" is a silent skip or a
+// real error is the caller's policy to decide (cli/scan.go already makes
+// that call for the direct Scan() call this replaces), not this analyzer's.
+func (a *Analyzer) Run(repoRoot string) ([]core.Finding, error) {
+	opts := a.opts
+	if opts.FullHistory && opts.OnProgress == nil {
+		opts.OnProgress = func(n, total int) {
+			if total > 0 {
+				fmt.Fprintf(os.Stderr, "   ... scanned %d/%d commits so far\n", n, total)
+			} else {
+				fmt.Fprintf(os.Stderr, "   ... scanned %d commits so far\n", n)
+			}
+		}
+	}
+
+	result, err := Scan(repoRoot, opts)
+	if err != nil {
+		return nil, err
+	}
+	if result.Truncated {
+		fmt.Fprintf(os.Stderr, "⚠️  git history scan stopped after %d commits (time budget) — some older history was not checked. Use --full-history for an exhaustive scan.\n", result.CommitsScanned)
+	}
+	return result.Findings, nil
 }
 
 func scanBlob(analyzer *secrets.Analyzer, f *object.File, path, commitHash string) []core.Finding {
