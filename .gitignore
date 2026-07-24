@@ -12,6 +12,10 @@
 # GoReleaser local build/release output (dist/)
 /dist/
 
+# npm package's downloaded platform binary (fetched by scripts/install.js)
+/npm/.bin/
+/npm/node_modules/
+
 # Test binary, built with `go test -c`
 *.test
 

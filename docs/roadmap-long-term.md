@@ -70,6 +70,18 @@ Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 
 ---
 
+## ✅ Fait (partiellement — publication npm non testée en réel) — Package npm de distribution
+
+**Objectif** : `npm install -g reposcan` sans Go installé, en s'appuyant sur les binaires précompilés de l'entrée précédente.
+
+**Scope** : sous-répertoire `npm/` de ce repo (`package.json`, `bin/reposcan.js`, `scripts/install.js`). `postinstall` télécharge l'archive GitHub Release correspondant à `process.platform`/`process.arch`, vérifie son SHA256 contre `checksums.txt`, extrait via le `tar` système (zéro dépendance npm — bsdtar sur Windows depuis 10 1803 gère aussi le zip). Choix explicitement écarté : les sous-paquets `optionalDependencies` par plateforme (pattern esbuild/swc) — plus robuste mais pas ce que le plan demandait, pas rouvert sans besoin identifié. Publication via un job `publish-npm` (`.github/workflows/release.yml`, `needs: release`) qui fixe la version depuis le tag puis `npm publish`.
+
+**Validé, pas juste écrit — avec une limite assumée** : `scripts/install.js` exécuté réellement contre un second tag jetable (`v0.0.0-npm-test`, supprimé après vérification) — téléchargement, vérification de checksum, extraction, et un vrai `reposcan scan .` à travers `bin/reposcan.js`, tout correct. **Ce qui n'a pas été testé** : le job `publish-npm` lui-même — ni le secret `NPM_TOKEN` (pas encore configuré côté GitHub au moment de cette entrée) ni un vrai `npm publish` n'ont été exercés, un `npm unpublish` public n'étant pas une opération propre à répéter comme un tag/release GitHub jetable. Le premier tag réel post-merge sera donc le premier vrai test de `publish-npm`.
+
+Détails et alternatives écartées : [ADR 0021](decisions/0021-npm-distribution.md).
+
+---
+
 ## ⏸️ En pause — en attente d'un besoin réel
 
 ### Marketplace de plugins
