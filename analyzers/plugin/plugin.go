@@ -97,6 +97,32 @@ func (p *Plugin) Close() {
 	_ = p.cmd.Wait()
 }
 
+// Configure sends this plugin its --plugin-arg key/value pairs (matched by
+// the caller against this plugin's own self-declared Name() from its
+// hello_ack) as a single "configure" message, sent once after the handshake
+// and before any "file" messages. Fire-and-forget: no response is expected
+// or read. A plugin that doesn't care about args is free to ignore this
+// message type entirely -- the same reason it's a brand new message type
+// rather than a new field squeezed into "hello" (sent before the host even
+// knows the plugin's name, so it couldn't target args by name at that
+// point) or "file" (redundant on every single message for something that
+// only needs to be said once).
+func (p *Plugin) Configure(args map[string]string) error {
+	p.mu.Lock()
+	alive := p.alive
+	p.mu.Unlock()
+	if !alive {
+		return nil
+	}
+
+	req := map[string]any{"type": "configure", "args": args}
+	if err := p.writeLine(req); err != nil {
+		p.abandon(fmt.Sprintf("plugin %q: failed to send configure message (%v) — skipping it for this scan", p.name, err))
+		return err
+	}
+	return nil
+}
+
 func (p *Plugin) handshake() error {
 	req := map[string]any{
 		"type":             "hello",

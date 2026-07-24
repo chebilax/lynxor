@@ -24,6 +24,13 @@ for arg in sys.argv[1:]:
     if arg.startswith("--misbehave="):
         MISBEHAVE = arg.split("=", 1)[1]
 
+# Populated by a "configure" message, if the host sent one (only happens if
+# the user passed --plugin-arg addressed at this plugin's own plugin_name,
+# "reference-example"). Surfaced in each finding's context below so a
+# manual end-to-end test can see it actually arrived, not just trust the
+# protocol doc's claim that it would.
+CONFIG = {}
+
 
 def send(msg):
     sys.stdout.write(json.dumps(msg) + "\n")
@@ -49,6 +56,10 @@ def main():
             })
             continue
 
+        if msg["type"] == "configure":
+            CONFIG.update(msg.get("args", {}))
+            continue  # fire-and-forget, no reply expected or sent
+
         if msg["type"] == "file":
             path = msg["path"]
 
@@ -71,6 +82,7 @@ def main():
                         "message": "This is the reference plugin's own test marker, not a real secret — it exists only to prove the plugin protocol round-trips a finding correctly.",
                         "fix": "Nothing to fix; this is a protocol test fixture.",
                         "line": i,
+                        "context": f"configured args: {CONFIG}" if CONFIG else "",
                     })
             send({"type": "result", "path": path, "findings": findings})
             continue

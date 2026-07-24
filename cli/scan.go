@@ -22,6 +22,7 @@ func newScanCmd() *cobra.Command {
 	var noHistory bool
 	var checkDeps bool
 	var pluginPaths []string
+	var pluginArgs []string
 	var format string
 
 	cmd := &cobra.Command{
@@ -42,7 +43,9 @@ that needs the network. --deps enables it explicitly.
 --plugin runs an external plugin executable alongside the built-in rules
 (see docs/plugin-protocol.md). A plugin that crashes, times out, or
 misbehaves is dropped for the rest of the scan with a warning — it never
-fails the whole scan.`,
+fails the whole scan. --plugin-arg passes it configuration, addressed by
+the plugin's own self-declared name from its handshake, e.g.
+--plugin-arg my-plugin:api-key=xyz.`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if fullHistory && noHistory {
@@ -50,6 +53,10 @@ fails the whole scan.`,
 			}
 			if format != "cli" && format != "json" && format != "html" {
 				return fmt.Errorf("--format must be \"cli\", \"json\", or \"html\", got %q", format)
+			}
+			argsByPlugin, err := parsePluginArgs(pluginArgs)
+			if err != nil {
+				return err
 			}
 
 			path := "."
@@ -76,6 +83,13 @@ fails the whole scan.`,
 				if err != nil {
 					fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  %v — skipping this plugin\n", err)
 					continue
+				}
+				if args, ok := argsByPlugin[loaded.Name()]; ok {
+					if err := loaded.Configure(args); err != nil {
+						fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  plugin %q: %v — skipping this plugin\n", loaded.Name(), err)
+						loaded.Close()
+						continue
+					}
 				}
 				analyzerList = append(analyzerList, loaded)
 				loadedPlugins = append(loadedPlugins, loaded)
@@ -175,7 +189,36 @@ fails the whole scan.`,
 	cmd.Flags().BoolVar(&noHistory, "no-history", false, "skip git history scanning, working tree only")
 	cmd.Flags().BoolVar(&checkDeps, "deps", false, "check go.sum/requirements.txt dependencies against known vulnerabilities via OSV.dev — requires network, off by default")
 	cmd.Flags().StringArrayVar(&pluginPaths, "plugin", nil, "path to an external plugin executable (see docs/plugin-protocol.md) — repeatable")
+	cmd.Flags().StringArrayVar(&pluginArgs, "plugin-arg", nil, `configuration for a loaded plugin, format "<plugin_name>:<key>=<value>" — repeatable, matched against the plugin's own self-declared name from its handshake (see docs/plugin-protocol.md)`)
 	cmd.Flags().StringVar(&format, "format", "cli", `output format: "cli" (default, colored terminal), "json" (machine-readable, docs/decisions/0009-json-output-schema.md), or "html" (self-contained dashboard, docs/decisions/0010-html-dashboard.md)`)
 
 	return cmd
+}
+
+// parsePluginArgs turns repeated "<plugin_name>:<key>=<value>" flag values
+// into a lookup by plugin name. Name-addressed rather than positional
+// (matching --plugin occurrences up by order) or uniform-for-all-plugins:
+// --plugin is repeatable, and Cobra/pflag give no ordering guarantee that
+// would let a positional scheme reliably pair a --plugin-arg with the
+// --plugin instance it's meant for. Addressing by the plugin's own
+// self-declared name (from its hello_ack) has no such ambiguity, at the
+// cost of the user needing to already know that name -- already documented
+// in docs/plugin-protocol.md as something a plugin author must declare.
+func parsePluginArgs(raw []string) (map[string]map[string]string, error) {
+	byPlugin := map[string]map[string]string{}
+	for _, entry := range raw {
+		name, kv, ok := strings.Cut(entry, ":")
+		if !ok {
+			return nil, fmt.Errorf(`--plugin-arg %q: expected format "<plugin_name>:<key>=<value>"`, entry)
+		}
+		key, value, ok := strings.Cut(kv, "=")
+		if !ok {
+			return nil, fmt.Errorf(`--plugin-arg %q: expected format "<plugin_name>:<key>=<value>"`, entry)
+		}
+		if byPlugin[name] == nil {
+			byPlugin[name] = map[string]string{}
+		}
+		byPlugin[name][key] = value
+	}
+	return byPlugin, nil
 }

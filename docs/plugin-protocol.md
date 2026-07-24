@@ -17,8 +17,9 @@ WASM (WASI) would give stronger sandboxing than a subprocess — no filesystem o
 
 1. RepoScan starts your plugin executable once per scan (not once per file — spawning a process per file would be far too slow on a large repo).
 2. RepoScan sends a `hello` message on your stdin. You reply with `hello_ack` on your stdout.
-3. For each eligible file in the repo (already filtered by RepoScan's own size/binary/vendored-path rules — you never see files larger than 2 MiB, binary files, or anything under `vendor/`/`node_modules/`), RepoScan sends one `file` message and waits for exactly one `result` message back before sending the next file. One line of JSON per message (NDJSON), synchronous, no concurrent requests.
-4. When there are no more files, RepoScan closes your stdin. Exit when you see EOF.
+3. If the user passed `--plugin-arg` values addressed to your `plugin_name`, RepoScan sends one `configure` message next. You don't need to acknowledge it — see below.
+4. For each eligible file in the repo (already filtered by RepoScan's own size/binary/vendored-path rules — you never see files larger than 2 MiB, binary files, or anything under `vendor/`/`node_modules/`), RepoScan sends one `file` message and waits for exactly one `result` message back before sending the next file. One line of JSON per message (NDJSON), synchronous, no concurrent requests.
+5. When there are no more files, RepoScan closes your stdin. Exit when you see EOF.
 
 ## Byte-only contract — read this before writing any file I/O in your plugin
 
@@ -42,9 +43,19 @@ Every message is one JSON object per line on stdin/stdout (NDJSON). All messages
 {"type": "hello_ack", "protocol_version": "1.0", "plugin_name": "terraform-lint", "plugin_version": "0.1.0"}
 ```
 
-`plugin_name` must be a short, stable identifier (lowercase, no spaces — treat it like a package name). It's used to namespace your finding IDs: see below.
+`plugin_name` must be a short, stable identifier (lowercase, no spaces — treat it like a package name). It's used to namespace your finding IDs: see below. It's also what a user addresses `--plugin-arg` at, so document your own `plugin_name` for anyone configuring your plugin.
 
 If you don't support the given `protocol_version`, reply with a fatal error instead (see below) rather than guessing.
+
+### `configure` (host → plugin, once, only if `--plugin-arg` was used)
+
+```json
+{"type": "configure", "args": {"api-key": "xyz", "mode": "strict"}}
+```
+
+Sent right after the handshake, before any `file` messages — never repeated. Only sent at all if the user passed at least one `--plugin-arg <your_plugin_name>:<key>=<value>` on the command line; if they didn't, your plugin never receives this message type, and nothing about the rest of the protocol changes. **Fire-and-forget: don't send any reply.** A plugin that has no use for configuration is free to ignore this message entirely — reading it is opt-in, not a new required step in your handshake.
+
+`args` is always a flat string-to-string map — parse whatever values you expect out of it yourself (numbers, booleans, etc. all arrive as strings).
 
 ### `file` (host → plugin, once per eligible file)
 
