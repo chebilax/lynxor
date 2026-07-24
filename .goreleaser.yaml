@@ -1,0 +1,49 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: reposcan
+    main: .
+    binary: reposcan
+    env:
+      - CGO_ENABLED=0 # pure Go (go-git has no cgo dependency) -- lets every
+      # target below cross-compile without a matching C toolchain per OS/arch.
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # {{.Tag}} keeps the "vX.Y.Z" form (not {{.Version}}, which strips the
+    # leading "v") to match the version string every other build path in
+    # this project already injects -- Makefile's git describe, action.yml's
+    # ref, the Homebrew formula's v#{version} (see docs/decisions/0013-version-flag.md).
+    ldflags:
+      - -s -w -X main.version={{ .Tag }}
+
+archives:
+  - id: reposcan
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    # reposcan_linux_amd64.tar.gz, reposcan_windows_amd64.zip, etc. -- this
+    # exact naming scheme is what the npm postinstall downloader (next PR)
+    # constructs from process.platform/process.arch, so changing it later
+    # is a breaking change for that package, not just cosmetic.
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+# No Docker images, no Homebrew tap publishing, no .deb/.rpm packaging --
+# this pipeline's only job is precompiled GitHub release binaries (needed
+# for the npm distribution package). The Homebrew tap
+# (github.com/xchebila/homebrew-reposcan) stays hand-maintained and tested
+# locally before every push (see docs/decisions/0011-github-action.md's
+# reasoning, still true here): letting GoReleaser push to it directly would
+# bypass that manual brew install --build-from-source + brew test discipline.
