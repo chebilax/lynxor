@@ -17,13 +17,15 @@ brew tap xchebila/reposcan
 brew install reposcan
 ```
 
-Builds from source (`depends_on "go" => :build`) — no precompiled binaries, no separate release pipeline to maintain, same reasoning as the GitHub Action below. See [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan).
+Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub Action below — deliberately not switched to precompiled binaries, so this stays hand-tested (`brew install --build-from-source` + `brew test`) rather than trusting a pipeline blindly. See [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan).
 
 **`go install`**, if you already have Go 1.24+:
 
 ```bash
 go install github.com/xchebila/reposcan@v1.0.2   # or @latest, or a commit SHA
 ```
+
+**Precompiled binaries**: every tagged release publishes Linux/macOS/Windows (amd64/arm64) archives and a `checksums.txt` as GitHub Release assets, built via GoReleaser — see [releases](https://github.com/xchebila/reposcan/releases) and [ADR 0020](docs/decisions/0020-goreleaser.md).
 
 **From source**:
 

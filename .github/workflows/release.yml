@@ -1,0 +1,51 @@
+name: Release
+
+# Triggered on a version tag push -- publishes precompiled binaries
+# (linux/darwin/windows, amd64/arm64) as GitHub Release assets via
+# GoReleaser (see .goreleaser.yaml, docs/decisions/0020-goreleaser.md).
+# Needed for the npm distribution package's postinstall downloader.
+on:
+  push:
+    tags:
+      - "v*"
+
+# Scoped, not write-all (which repoaudit's own cicd analyzer would flag) --
+# only the one permission GoReleaser actually needs to create a release and
+# upload assets. repoaudit-self-check.yml stays read-only; this is the one
+# workflow in this repo that legitimately needs write access.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # GoReleaser needs full history to generate release notes from commits
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      # Same checklist every PR in this project runs before merge (see
+      # Makefile) -- a tag is cut from main, which already passed this in
+      # its own PR, but a release artifact is expensive to get wrong, so
+      # this is checked again right before publishing rather than assumed.
+      - name: Verify build
+        run: |
+          go build ./...
+          go vet ./...
+          test -z "$(gofmt -l .)"
+          go test ./...
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
