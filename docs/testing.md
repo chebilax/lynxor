@@ -165,6 +165,10 @@ Le HTML généré lui-même se valide en deux temps, aucun des deux par simple l
 - Bien-formé structurellement : tags équilibrés. Vérifié une première fois manuellement avec le parseur HTML de la stdlib Python (`html.parser`) ; depuis l'ADR 0014, `assertBalancedHTML` (`output/html_test.go`) fait la même vérification en Go à chaque run de `go test`, sans dépendance externe.
 - Rendu visuel inspecté via un Artifact publié temporairement — cet environnement n'a pas d'outil de capture d'écran, donc la vérification pixel-perfect (alignement, espacement) reste à la charge de la review humaine ; l'automatisé couvre la structure et la logique couleur/statut, pas la mise en page. Le timestamp `generated <date>` du template est normalisé avant comparaison au golden file (`normalizeHTMLTimestamp`), sinon chaque run produirait un diff sur la seule valeur qui doit changer à chaque run.
 
+## GoReleaser : local `--snapshot` d'abord, mais validé par un vrai tag poussé
+
+`.goreleaser.yaml` et `.github/workflows/release.yml` (ADR 0020) n'ont pas été jugés prêts sur la seule base d'un `goreleaser build --snapshot --clean` local (6 binaires produits, `--version` retourne bien la forme `vX.Y.Z` grâce à `{{.Tag}}`) — même standard que pour l'Action GitHub et le tap Homebrew : un tag de test jetable (`v0.0.0-goreleaser-test`) a été poussé pour de vrai, déclenchant un vrai run de `release.yml` sur GitHub Actions avec un vrai `GITHUB_TOKEN`. La release générée contenait les 6 archives attendues (`reposcan_<os>_<arch>.tar.gz`/`.zip`) plus `checksums.txt` avec les bons SHA256 — vérifié via `gh release view`, pas juste supposé parce que le job est passé au vert. Tag et release de test supprimés après vérification.
+
 ## Où sont les chiffres
 
 `docs/benchmarks.md` — table append-only, un run par phase/PR. Ce fichier-ci dit *quoi* tester et *pourquoi* ; benchmarks.md dit *ce qui a été mesuré, quand*.

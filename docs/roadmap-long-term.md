@@ -46,7 +46,7 @@ Snippets documentés (`docs/ci-integrations.md`), pas un artefact publié (pas d
 
 **Objectif** : installer `reposcan` sans cloner le repo ni avoir Go préinstallé manuellement — Homebrew gère la dépendance de build lui-même. Fonctionne sur Linux et macOS (Homebrew, pas seulement macOS).
 
-**Scope** : repo séparé [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan) (convention Homebrew), un seul fichier `Formula/reposcan.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés, pas de GoReleaser, même raisonnement que pour le GitHub Action (ADR 0011) : pas de besoin prouvé pour cette infra maintenant.
+**Scope** : repo séparé [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan) (convention Homebrew), un seul fichier `Formula/reposcan.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés pour ce chemin-là, même quand GoReleaser est arrivé plus tard (voir plus bas) : décision reconfirmée, pas juste un oubli.
 
 **Prérequis découvert avant de coder** : `--version` n'existait pas sur le binaire (vérifié empiriquement : `unknown flag: --version`) — ajouté dans ce même travail plutôt qu'après coup (ADR 0013).
 
@@ -55,6 +55,18 @@ Snippets documentés (`docs/ci-integrations.md`), pas un artefact publié (pas d
 **Validé, pas juste écrit** : `brew tap` + `brew install --build-from-source` + `brew test` exécutés réellement en local avant de pousser la formula — les trois verts. Commande d'installation documentée dans le README principal, à côté de `go install` (qui n'existait pas non plus comme instruction directe utilisateur avant cette même entrée — ajouté au passage).
 
 **Renommage RepoAudit → RepoScan (avant publication)** : le tap est passé à [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan), `Formula/reposcan.rb`, pointant vers `v1.0.2` — le premier tag coupé sous le module renommé (`v1.0.0` et `v1.0.1` déclarent encore `github.com/xchebila/repoaudit` dans leur `go.mod`, donc incompatibles avec `go install github.com/xchebila/reposcan@...` quel que soit le tag demandé, indépendamment de tout redirect GitHub — vérifié empiriquement : `go install ...@v1.0.1` échoue avec `module declares its path as: github.com/xchebila/repoaudit but was required as: github.com/xchebila/reposcan`). Même triple validation locale refaite sur la nouvelle formula avant de la pousser. L'ancien tap `homebrew-repoaudit` est à supprimer — bloqué : le token `gh` de cet environnement n'a pas le scope `delete_repo`, suppression à faire manuellement.
+
+---
+
+## ✅ Fait — GoReleaser (binaires précompilés)
+
+**Objectif** : publier des binaires précompilés (Linux/macOS/Windows, amd64/arm64) comme assets de GitHub Release à chaque tag — nécessaire pour le futur package npm de distribution (postinstall qui télécharge le bon binaire selon `process.platform`/`process.arch`, pas encore fait au moment de cette entrée), sans dépendre d'un `go install` ou d'un build local.
+
+**Scope** : `.goreleaser.yaml` + `.github/workflows/release.yml`, déclenché sur push de tag `v*`. `CGO_ENABLED=0` (aucune dépendance cgo dans ce projet, vérifié par un vrai build avant d'écrire la config). Uniquement des binaires GitHub Release — pas de Docker, pas de publication automatique sur le tap Homebrew, pas de `.deb`/`.rpm` : le tap reste géré à la main (voir entrée précédente), même raisonnement que pour le GitHub Action (ADR 0011).
+
+**Validé, pas juste écrit** : `goreleaser build`/`release --snapshot` en local d'abord, puis un vrai tag jetable (`v0.0.0-goreleaser-test`) poussé pour déclencher `release.yml` pour de vrai sur GitHub Actions — la release générée contenait les 6 archives attendues (`reposcan_<os>_<arch>.tar.gz`/`.zip`) plus `checksums.txt`, avant suppression du tag et de la release de test.
+
+Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 
 ---
 
