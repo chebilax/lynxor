@@ -78,13 +78,26 @@ jobs:
           # (npmjs.com/docs/trusted-publishers). 24 is Active LTS (support
           # through April 2028); Node itself already comfortably clears the
           # floor.
+          #
+          # Deliberately NOT setting registry-url here (unlike a classic
+          # token-auth setup): with it set, setup-node@v7 still writes
+          # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into
+          # .npmrc even with no NODE_AUTH_TOKEN in the environment --
+          # confirmed empirically (a real debug run showed this literal,
+          # unexpanded line), not just read about (actions/setup-node#1551,
+          # closed as a duplicate, not actually fixed despite v7.0.0's
+          # changelog claiming to remove this). npm reads that stale
+          # config, assumes token auth is configured, and never attempts
+          # the OIDC handshake -- 401 on `npm whoami`, 404 on publish.
+          # npmjs.org is npm's own compiled-in default registry anyway, so
+          # omitting registry-url changes nothing except not generating
+          # the line that breaks OIDC.
           node-version: "24"
-          registry-url: "https://registry.npmjs.org"
 
-      # setup-node's bundled npm (whatever ships with the resolved Node
-      # patch) is not confirmed >= 11.5.1 -- Node's own release notes don't
-      # state the bundled npm version, so this isn't left to chance. Floated
-      # on the 11.x line, not @latest: npm 12 shipped ~2 weeks ago and
+      # Trusted publishing requires npm CLI >= 11.5.1; not confirmed as
+      # setup-node's default for a given Node patch (Node's own release
+      # notes don't state the bundled npm version). Floated on the 11.x
+      # line, not @latest: npm 12 shipped ~2 weeks before this decision and
       # changed install-script security defaults -- not proven enough yet
       # for this pipeline. Not pinned to an exact patch either, so this
       # doesn't need manual bumps for routine 11.x patches (same tracking
