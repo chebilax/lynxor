@@ -175,7 +175,9 @@ Le HTML généré lui-même se valide en deux temps, aucun des deux par simple l
 
 Limite explicitement assumée, pas cachée : le job `publish-npm` lui-même (`.github/workflows/release.yml`) n'a pas été exercé pour de vrai. Publier pour de vrai sur le registre npm public n'est pas une opération aussi propre à annuler (`npm unpublish` a des restrictions, contrairement à `gh release delete`) — le prochain tag réel sera donc le premier vrai test de `publish-npm`.
 
-**Mise à jour** : `NPM_TOKEN` n'a finalement jamais été configuré — remplacé par le trusted publishing npm (OIDC) avant le premier essai réel (voir la mise à jour d'ADR 0021). `id-token: write` scopé au job, `actions/setup-node` passé à `@v7`/Node 22 (planchers exigés : npm CLI ≥ 11.5.1, Node ≥ 22.14.0), plus de `NODE_AUTH_TOKEN`.
+**Mise à jour** : `NPM_TOKEN` n'a finalement jamais été configuré — remplacé par le trusted publishing npm (OIDC) avant le premier essai réel (voir la mise à jour d'ADR 0021). `id-token: write` scopé au job, `actions/setup-node` passé à `@v7`/Node 24, plus de `NODE_AUTH_TOKEN`.
+
+**Mise à jour 2 — le premier vrai run a échoué, root cause trouvée par deux tags jetables de debug, pas par théorie** : `v1.1.1` a déclenché `publish-npm` pour de vrai → `404`. Un tag jetable avec étape de diagnostic temporaire (impression de `.npmrc`/`npm whoami`) a montré la vraie cause : `actions/setup-node@v7` écrit `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` dans `.npmrc` dès que `registry-url` est renseigné, même sans secret — npm croit avoir un token, n'essaie jamais l'OIDC (`401` sur `whoami`, `404` sur `publish`). Correctif : ne plus renseigner `registry-url` (le registre par défaut d'npm est déjà `registry.npmjs.org`). Un second tag jetable après correctif a confirmé que l'authentification passe désormais : erreur différente et attendue (prérelease sans `--tag`, artefact du nom du tag de test, pas un problème pour un vrai `X.Y.Z`). Détail complet : mise à jour d'ADR 0021.
 
 ## Renommage de compte GitHub xchebila → chebilax (2026-07-26)
 
