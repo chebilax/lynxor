@@ -14,7 +14,7 @@ Lynxor is pre-1.x-stable and mono-maintained. Only the latest tagged release and
 
 ## Reporting a vulnerability
 
-**Please use [GitHub's private vulnerability reporting](https://github.com/xchebila/lynxor/security/advisories/new)** for this repository, rather than a public issue. This keeps the report private until a fix is available.
+**Please use [GitHub's private vulnerability reporting](https://github.com/chebilax/lynxor/security/advisories/new)** for this repository, rather than a public issue. This keeps the report private until a fix is available.
 
 If that isn't available to you for some reason, open a regular issue asking to be contacted privately — don't post exploit details or proof-of-concept code in a public issue.
 
@@ -29,7 +29,7 @@ In scope:
 - Anything that lets a scanned repository's content (a crafted `Dockerfile`, `.github/workflows/*.yml`, `go.sum`/`requirements.txt`, or any file Lynxor reads) cause Lynxor to execute code, read/write outside the scanned path, or otherwise do something the user running it didn't ask for.
 - Anything in the [plugin protocol](docs/plugin-protocol.md) that breaks the byte-only boundary between the host and a plugin process (e.g. a plugin gaining access to something beyond the file bytes it's handed).
 - Credential/secret handling bugs in Lynxor's own code (not in the repos it scans) — e.g. a secret Lynxor detects ending up logged or written somewhere it shouldn't.
-- Supply-chain issues in Lynxor's own dependencies or release/distribution path (`action.yml`, the [Homebrew tap](https://github.com/xchebila/homebrew-lynxor), `go install`).
+- Supply-chain issues in Lynxor's own dependencies or release/distribution path (`action.yml`, the [Homebrew tap](https://github.com/chebilax/homebrew-lynxor), `go install`).
 
 Out of scope (please file as a regular bug instead):
 - False negatives or false positives in detection rules (a secret pattern Lynxor misses, or flags incorrectly) — these are accuracy bugs, not vulnerabilities in Lynxor itself, unless the false negative is *caused by* an exploitable flaw in the detection logic rather than a rule simply not covering that case yet.

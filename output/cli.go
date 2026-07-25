@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 const (

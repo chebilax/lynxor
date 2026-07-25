@@ -18,8 +18,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
-	"github.com/xchebila/lynxor/analyzers"
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/analyzers"
+	"github.com/chebilax/lynxor/core"
 )
 
 // ErrNotAGitRepo mirrors githistory's error: Security Diff Mode is

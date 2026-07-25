@@ -5,11 +5,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xchebila/lynxor.git",
+    "url": "git+https://github.com/chebilax/lynxor.git",
     "directory": "npm"
   },
-  "homepage": "https://github.com/xchebila/lynxor",
-  "bugs": "https://github.com/xchebila/lynxor/issues",
+  "homepage": "https://github.com/chebilax/lynxor",
+  "bugs": "https://github.com/chebilax/lynxor/issues",
   "bin": {
     "lynxor": "bin/lynxor.js"
   },

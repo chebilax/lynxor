@@ -3,7 +3,7 @@ package docker
 import (
 	"testing"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 func TestRun(t *testing.T) {

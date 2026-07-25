@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xchebila/lynxor/cli"
+	"github.com/chebilax/lynxor/cli"
 )
 
 // version is overridden at build time via -ldflags "-X main.version=...";

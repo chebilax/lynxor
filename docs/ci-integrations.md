@@ -17,7 +17,7 @@ lynxor:
     GOPROXY: direct
     GOSUMDB: 'off' # installing lynxor itself from its own repo, not a third-party dependency
   before_script:
-    - go install github.com/xchebila/lynxor@main # pin to a release tag once one exists
+    - go install github.com/chebilax/lynxor@main # pin to a release tag once one exists
   script:
     - |
       if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then
@@ -59,7 +59,7 @@ stage('Lynxor') {
         GOSUMDB = 'off' // installing lynxor itself from its own repo, not a third-party dependency
     }
     steps {
-        sh 'go install github.com/xchebila/lynxor@main' // pin to a release tag once one exists
+        sh 'go install github.com/chebilax/lynxor@main' // pin to a release tag once one exists
         script {
             if (env.CHANGE_ID) {
                 // CHANGE_TARGET is a branch name, not a SHA (same footgun

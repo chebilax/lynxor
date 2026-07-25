@@ -3,7 +3,7 @@ package secrets
 import (
 	"testing"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 // These fixture values are split across two (or more) Go string literals

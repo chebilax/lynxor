@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 // osvBatchURL and osvVulnURL are var, not const, so tests can point them at

@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 type Analyzer struct{}

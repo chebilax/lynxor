@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 // WriteHTMLReport renders a self-contained HTML dashboard: no external

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/xchebila/lynxor/analyzers/diffmode"
+	"github.com/chebilax/lynxor/analyzers/diffmode"
 )
 
 // WriteDiffReport prints only what changed between two refs — vision.md's

@@ -4,7 +4,7 @@ description: >
   dependency vulnerabilities. Runs `lynxor diff` on a pull request
   (reports only what the PR introduces or fixes), or `lynxor scan`
   otherwise (reports the repo's absolute score).
-author: 'xchebila'
+author: 'chebilax'
 branding:
   icon: 'shield'
   color: 'red'
@@ -72,7 +72,7 @@ runs:
             ref="${{ github.sha }}"
           fi
         fi
-        go install -ldflags "-X main.version=$ref" "github.com/xchebila/lynxor@$ref"
+        go install -ldflags "-X main.version=$ref" "github.com/chebilax/lynxor@$ref"
 
     - name: lynxor diff (pull request)
       if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'

@@ -37,7 +37,7 @@ async function main() {
     fail(
       `unsupported platform/arch combination: ${process.platform}/${process.arch}. ` +
         `Supported: ${Object.keys(PLATFORMS).join(", ")} x ${Object.keys(ARCHES).join(", ")}. ` +
-        `Build from source instead: https://github.com/xchebila/lynxor#install--build`,
+        `Build from source instead: https://github.com/chebilax/lynxor#install--build`,
     );
   }
 
@@ -46,7 +46,7 @@ async function main() {
   const tag = `v${version}`;
   const ext = platform === "windows" ? "zip" : "tar.gz";
   const archiveName = `lynxor_${platform}_${arch}.${ext}`;
-  const base = `https://github.com/xchebila/lynxor/releases/download/${tag}`;
+  const base = `https://github.com/chebilax/lynxor/releases/download/${tag}`;
 
   console.log(`lynxor: fetching ${archiveName} (${tag})...`);
   const [archive, checksums] = await Promise.all([

@@ -46,7 +46,7 @@ Snippets documentés (`docs/ci-integrations.md`), pas un artefact publié (pas d
 
 **Objectif** : installer `lynxor` sans cloner le repo ni avoir Go préinstallé manuellement — Homebrew gère la dépendance de build lui-même. Fonctionne sur Linux et macOS (Homebrew, pas seulement macOS).
 
-**Scope** : repo séparé [xchebila/homebrew-lynxor](https://github.com/xchebila/homebrew-lynxor) (convention Homebrew), un seul fichier `Formula/lynxor.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés pour ce chemin-là, même quand GoReleaser est arrivé plus tard (voir plus bas) : décision reconfirmée, pas juste un oubli.
+**Scope** : repo séparé [chebilax/homebrew-lynxor](https://github.com/chebilax/homebrew-lynxor) (convention Homebrew), un seul fichier `Formula/lynxor.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés pour ce chemin-là, même quand GoReleaser est arrivé plus tard (voir plus bas) : décision reconfirmée, pas juste un oubli.
 
 **Prérequis découvert avant de coder** : `--version` n'existait pas sur le binaire (vérifié empiriquement : `unknown flag: --version`) — ajouté dans ce même travail plutôt qu'après coup (ADR 0013).
 

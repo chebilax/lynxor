@@ -13,16 +13,16 @@ Signal over noise: no 500 warnings, just what's actionable. Every finding explai
 **Homebrew** (macOS or Linux):
 
 ```bash
-brew tap xchebila/lynxor
+brew tap chebilax/lynxor
 brew install lynxor
 ```
 
-Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub Action below — deliberately not switched to precompiled binaries, so this stays hand-tested (`brew install --build-from-source` + `brew test`) rather than trusting a pipeline blindly. See [xchebila/homebrew-lynxor](https://github.com/xchebila/homebrew-lynxor).
+Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub Action below — deliberately not switched to precompiled binaries, so this stays hand-tested (`brew install --build-from-source` + `brew test`) rather than trusting a pipeline blindly. See [chebilax/homebrew-lynxor](https://github.com/chebilax/homebrew-lynxor).
 
 **`go install`**, if you already have Go 1.24+:
 
 ```bash
-go install github.com/xchebila/lynxor@v1.1.0   # or @latest, or a commit SHA
+go install github.com/chebilax/lynxor@v1.1.0   # or @latest, or a commit SHA
 ```
 
 `lynxor --version` will print `dev` this way — this project's version string is only set via `-ldflags` (see below), which plain `go install` never passes. Use Homebrew, npm, a precompiled binary, or `go build` from a clone (all inject it correctly) if the version string matters to you.
@@ -35,12 +35,12 @@ npm install -g lynxor
 
 See [npm/](npm/) and [ADR 0021](docs/decisions/0021-npm-distribution.md).
 
-**Precompiled binaries**: every tagged release publishes Linux/macOS/Windows (amd64/arm64) archives and a `checksums.txt` as GitHub Release assets, built via GoReleaser — see [releases](https://github.com/xchebila/lynxor/releases) and [ADR 0020](docs/decisions/0020-goreleaser.md).
+**Precompiled binaries**: every tagged release publishes Linux/macOS/Windows (amd64/arm64) archives and a `checksums.txt` as GitHub Release assets, built via GoReleaser — see [releases](https://github.com/chebilax/lynxor/releases) and [ADR 0020](docs/decisions/0020-goreleaser.md).
 
 **From source**:
 
 ```bash
-git clone git@github.com:xchebila/lynxor.git
+git clone git@github.com:chebilax/lynxor.git
 cd lynxor
 go build -o lynxor .
 ```
@@ -129,13 +129,13 @@ Every mode that produces a score (`scan` in any `--format`) exits with code 1 if
 A composite action (`action.yml` at the repo root) wraps the CLI — no new checks, pure packaging:
 
 ```yaml
-- uses: xchebila/lynxor@main
+- uses: chebilax/lynxor@main
   with:
     fail-on-new: true   # pin to a release tag instead of @main once one exists
     deps: true          # optional: pass --deps to scan runs (ignored on pull_request)
 ```
 
-On a `pull_request` event it runs `lynxor diff <base-sha> <head-sha>` (the actual commit SHAs from the event payload, not branch names); on any other event (e.g. a push to `main`) it runs `lynxor scan . --format json` and uploads the result as a build artifact. `fail-on-new: false` reports without failing the build. The action does its own `actions/checkout` with `fetch-depth: 0` and installs `lynxor` itself via `go install` — nothing needs to be pre-installed on the runner. See [docs/decisions/0011-github-action.md](docs/decisions/0011-github-action.md) for why (and for the module rename to `github.com/xchebila/lynxor` that `go install` required). `.github/workflows/lynxor-self-check.yml` runs this action against the repo's own PRs and pushes, so it's proven against real CI, not just YAML that parses.
+On a `pull_request` event it runs `lynxor diff <base-sha> <head-sha>` (the actual commit SHAs from the event payload, not branch names); on any other event (e.g. a push to `main`) it runs `lynxor scan . --format json` and uploads the result as a build artifact. `fail-on-new: false` reports without failing the build. The action does its own `actions/checkout` with `fetch-depth: 0` and installs `lynxor` itself via `go install` — nothing needs to be pre-installed on the runner. See [docs/decisions/0011-github-action.md](docs/decisions/0011-github-action.md) for why (and for the module rename to `github.com/chebilax/lynxor` that `go install` required). `.github/workflows/lynxor-self-check.yml` runs this action against the repo's own PRs and pushes, so it's proven against real CI, not just YAML that parses.
 
 Not on GitHub Actions? See [docs/ci-integrations.md](docs/ci-integrations.md) for a GitLab CI and a Jenkins snippet doing the same `diff`/`scan --format json` split — documented copy-paste examples rather than a published artifact (see [docs/decisions/0012-multi-ci-integrations.md](docs/decisions/0012-multi-ci-integrations.md) for why), and not validated against a real GitLab/Jenkins run the way `action.yml` is.
 

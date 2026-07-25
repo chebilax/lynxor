@@ -175,6 +175,12 @@ Le HTML généré lui-même se valide en deux temps, aucun des deux par simple l
 
 Limite explicitement assumée, pas cachée : le job `publish-npm` lui-même (`.github/workflows/release.yml`) n'a pas été exercé pour de vrai — ni le secret `NPM_TOKEN` (absent au moment de cette entrée, `gh secret list` le confirme vide) ni un vrai `npm publish` n'ont été testés, contrairement à `release.yml`/GoReleaser où le tag-jetable-puis-suppression fonctionne proprement. Publier pour de vrai sur le registre npm public n'est pas une opération aussi propre à annuler (`npm unpublish` a des restrictions, contrairement à `gh release delete`) — le premier tag réel après ce merge sera donc le premier vrai test de `publish-npm`, une fois `NPM_TOKEN` configuré.
 
+## Renommage de compte GitHub xchebila → chebilax (2026-07-26)
+
+Pas de raisonnement de marque à tracer (contrairement à RepoAudit→RepoScan et RepoScan→Lynxor) — juste un changement de pseudo GitHub, donc pas d'ADR dédié, seulement ce repère technique. Inventaire (`git grep -lI -i "xchebila"`) fait et confirmé avant tout remplacement : 33 fichiers renommés (code, `go.mod`, `action.yml`, `.goreleaser.yaml`, `npm/`, docs tournées vers l'état courant), 2 fichiers volontairement laissés intacts — `docs/decisions/0022-rename-reposcan-to-lynxor.md` en entier, et 3 lignes de `docs/roadmap-long-term.md` — parce qu'ils narrent des événements réellement arrivés sous le compte `xchebila` (citations de messages d'erreur, commandes réelles), pas de la prose sur l'état actuel du projet.
+
+Validé après le remplacement : `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...` tous verts sous le nouveau chemin de module `github.com/chebilax/lynxor` ; binaire réel construit et exécuté (`scan .`, score inchangé 97/100, même finding connu). Reste à faire, suivi séparé : nouveau tag sous le module renommé (aucun tag existant ne résout sous `chebilax` — même contrainte technique que pour chaque renommage précédent), republication npm, tap Homebrew repointé.
+
 ## Où sont les chiffres
 
 `docs/benchmarks.md` — table append-only, un run par phase/PR. Ce fichier-ci dit *quoi* tester et *pourquoi* ; benchmarks.md dit *ce qui a été mesuré, quand*.

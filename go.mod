@@ -1,4 +1,4 @@
-module github.com/xchebila/lynxor
+module github.com/chebilax/lynxor
 
 go 1.25.0
 
