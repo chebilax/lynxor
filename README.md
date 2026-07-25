@@ -22,8 +22,10 @@ Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub A
 **`go install`**, if you already have Go 1.24+:
 
 ```bash
-go install github.com/xchebila/lynxor@v1.0.2   # or @latest, or a commit SHA
+go install github.com/xchebila/lynxor@v1.1.0   # or @latest, or a commit SHA
 ```
+
+`lynxor --version` will print `dev` this way — this project's version string is only set via `-ldflags` (see below), which plain `go install` never passes. Use Homebrew, npm, a precompiled binary, or `go build` from a clone (all inject it correctly) if the version string matters to you.
 
 **npm**, if you already have Node 18+ (no Go needed — downloads the matching precompiled binary on install):
 

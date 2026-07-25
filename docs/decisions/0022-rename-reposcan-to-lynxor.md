@@ -41,6 +41,18 @@ Un second stale antérieur, indépendant du renommage Lynxor, a été corrigé a
 - **Premier `npm publish` réel** — se fera directement sous `lynxor`, jamais sous `reposcan` (décision utilisateur explicite, voir Contexte).
 - **Renommage du dépôt npm `reposcan`** — n'existe pas : aucun `npm publish` sous ce nom n'a jamais eu lieu (vérifié : le premier `publish-npm` réel a échoué faute de `NPM_TOKEN`, avant ce renommage). Rien à dépublier.
 
+## Mise à jour (2026-07-25) — tous les suivis ci-dessus résolus, sauf le npm publish
+
+Dans l'heure suivant le merge de ce renommage :
+
+- **Repo GitHub renommé** par l'utilisateur lui-même : `xchebila/reposcan` → `xchebila/lynxor`. Vérifié : `git ls-remote git@github.com:xchebila/lynxor.git` répond, le remote local `origin` repointé dessus.
+- **`v1.1.0` recoupé pour de vrai depuis le code renommé** — l'ancien `v1.1.0` (coupé avant ce renommage, sous l'ancien module, avec de vrais assets `reposcan_*` déjà publiés) a été explicitement supprimé (tag + release GitHub) avant de recréer `v1.1.0` sur le nouveau commit, plutôt que de choisir un autre numéro — décision utilisateur explicite, un seul `v1.1.0` aura jamais existé publiquement avec du contenu réel (celui-ci). `release.yml`/GoReleaser a tourné pour de vrai dessus : 6 assets `lynxor_<os>_<arch>.tar.gz`/`.zip` + `checksums.txt` en ligne.
+- **Formule Homebrew mise à jour et validée en conditions réelles** : `Formula/reposcan.rb` → `Formula/lynxor.rb` (classe, nom de binaire, `url`/`sha256` repointés sur le vrai tarball `v1.1.0`, désormais correctement brandé Lynxor de bout en bout — contrairement à `v1.0.2` qui aurait produit un binaire nommé `lynxor` mais toujours brandé "RepoScan" à l'intérieur). Validé deux fois : d'abord contre un clone local tappé manuellement, puis après un vrai push vers `xchebila/homebrew-reposcan`, avec un tap complètement frais (`brew tap`/`brew install --build-from-source`/`brew test`, tous verts, binaire réel rapportant `lynxor version v1.1.0`).
+- **Tap Homebrew renommé** `xchebila/homebrew-reposcan` → `xchebila/homebrew-lynxor` via l'API GitHub (`gh api -X PATCH .../name=homebrew-lynxor`) — possible avec le scope `repo` du token, pas besoin de `delete_repo` (renommer n'est pas supprimer). Re-validé après coup avec la commande exacte du README : `brew tap xchebila/lynxor && brew install lynxor` — vert, `brew test` vert.
+- **`go install github.com/xchebila/lynxor@v1.1.0`** résout maintenant correctement (vérifié empiriquement) — le README a été corrigé pour pointer sur `v1.1.0` au lieu de `v1.0.2`. Limite pré-existante notée en passant, non introduite par ce renommage : `go install pkg@version` sans `-ldflags` explicite ne fixe pas la chaîne de version (`--version` rapporte `dev`, pas `v1.1.0`) — même limite qu'aurait eue `go install .../reposcan@v1.0.2` avant ce renommage ; seuls `action.yml`, le Makefile et la formule Homebrew passent `-ldflags` explicitement.
+
+**Reste ouvert** : le premier `npm publish` réel (`NPM_TOKEN` toujours pas configuré) et la question de l'ancien tap — non applicable maintenant puisqu'il n'existe plus sous ce nom (renommé, pas dupliqué).
+
 ## Validé, pas juste écrit
 
 - `go build ./...`, `go vet ./...`, `gofmt -l .` (une correction d'alignement nécessaire après le renommage du champ `lynxor_version`, `go fmt`-ée), `go test ./...` : tous verts après le renommage complet du module.
