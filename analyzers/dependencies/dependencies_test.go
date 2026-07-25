@@ -68,3 +68,128 @@ func TestParseGoSum_MissingFile(t *testing.T) {
 		t.Errorf("got %v, want nil for a missing file", deps)
 	}
 }
+
+func TestGoSumParser_Matches(t *testing.T) {
+	p := goSumParser{}
+	if !p.Matches("go.sum") {
+		t.Error("Matches(\"go.sum\") = false, want true")
+	}
+	if p.Matches("go.mod") || p.Matches("requirements.txt") {
+		t.Error("Matches should only match go.sum")
+	}
+}
+
+func TestGoSumParser_Parse(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "go.sum")
+	if err := os.WriteFile(path, []byte("example.com/mod v1.0.0 h1:abc=\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	deps := goSumParser{}.Parse(path, "go.sum")
+	if len(deps) != 1 || deps[0].Name != "example.com/mod" {
+		t.Errorf("got %+v, want one dependency example.com/mod@v1.0.0 (Parse must delegate to parseGoSum)", deps)
+	}
+}
+
+func TestRequirementsTxtParser_Matches(t *testing.T) {
+	p := requirementsTxtParser{}
+	if !p.Matches("requirements.txt") {
+		t.Error("Matches(\"requirements.txt\") = false, want true")
+	}
+	if p.Matches("go.sum") || p.Matches("requirements-dev.txt") {
+		t.Error("Matches should only match the exact filename requirements.txt")
+	}
+}
+
+func TestParseRequirementsTxt(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "requirements.txt")
+	content := `# a comment, skipped entirely
+requests==2.31.0
+django[bcrypt]==4.2.1  # inline comment stripped
+flask>=2.0  # unpinned, must be skipped -- see Discover's doc comment
+numpy==1.26.0; python_version >= "3.9"
+
+-r other-requirements.txt
+git+https://example.com/pkg.git
+`
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	deps := parseRequirementsTxt(path, "requirements.txt")
+
+	want := map[string]string{
+		"requests": "2.31.0",
+		"django":   "4.2.1",
+		"numpy":    "1.26.0",
+	}
+	if len(deps) != len(want) {
+		t.Fatalf("got %d dependencies, want %d: %+v", len(deps), len(want), deps)
+	}
+	for _, d := range deps {
+		wantVersion, ok := want[d.Name]
+		if !ok {
+			t.Errorf("unexpected dependency %+v", d)
+			continue
+		}
+		if d.Version != wantVersion {
+			t.Errorf("%s: got version %q, want %q", d.Name, d.Version, wantVersion)
+		}
+		if d.Ecosystem != "PyPI" {
+			t.Errorf("%s: Ecosystem = %q, want PyPI", d.Name, d.Ecosystem)
+		}
+	}
+}
+
+func TestParseRequirementsTxt_MissingFile(t *testing.T) {
+	if deps := parseRequirementsTxt("/does/not/exist/requirements.txt", "requirements.txt"); deps != nil {
+		t.Errorf("got %v, want nil for a missing file", deps)
+	}
+}
+
+func TestDiscover_WalksAndDispatchesToRegisteredParsers(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "go.sum", "example.com/mod v1.0.0 h1:abc=\n")
+	writeFile(t, dir, "requirements.txt", "requests==2.31.0\n")
+	writeFile(t, dir, filepath.Join("sub", "requirements.txt"), "flask==2.0.0\n")
+
+	deps := Discover(dir)
+
+	byName := map[string]Dependency{}
+	for _, d := range deps {
+		byName[d.Name] = d
+	}
+	if len(deps) != 3 {
+		t.Fatalf("got %d dependencies, want 3 (one per manifest file found): %+v", len(deps), deps)
+	}
+	if d, ok := byName["example.com/mod"]; !ok || d.Ecosystem != "Go" {
+		t.Errorf("expected the top-level go.sum dependency, got %+v", byName)
+	}
+	if d, ok := byName["flask"]; !ok || d.Manifest != filepath.Join("sub", "requirements.txt") {
+		t.Errorf("expected sub/requirements.txt's dependency with the right Manifest path, got %+v", byName)
+	}
+}
+
+func TestDiscover_SkipsGitAndVendoredDirs(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, filepath.Join(".git", "go.sum"), "should.not/be-seen v1.0.0 h1:abc=\n")
+	writeFile(t, dir, filepath.Join("vendor", "go.sum"), "also.not/seen v1.0.0 h1:abc=\n")
+	writeFile(t, dir, filepath.Join("frontend", "node_modules", "requirements.txt"), "should-not-appear==1.0.0\n")
+
+	deps := Discover(dir)
+	if len(deps) != 0 {
+		t.Errorf("got %+v, want no dependencies -- .git and vendored paths must be skipped entirely", deps)
+	}
+}
+
+func writeFile(t *testing.T, dir, rel, content string) {
+	t.Helper()
+	path := filepath.Join(dir, rel)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
