@@ -75,10 +75,22 @@ jobs:
         uses: actions/setup-node@v7
         with:
           # Trusted publishing needs npm CLI >= 11.5.1 and Node >= 22.14.0
-          # (npmjs.com/docs/trusted-publishers) -- 20 (the prior pin) is
-          # below both floors.
-          node-version: "22"
+          # (npmjs.com/docs/trusted-publishers). 24 is Active LTS (support
+          # through April 2028); Node itself already comfortably clears the
+          # floor.
+          node-version: "24"
           registry-url: "https://registry.npmjs.org"
+
+      # setup-node's bundled npm (whatever ships with the resolved Node
+      # patch) is not confirmed >= 11.5.1 -- Node's own release notes don't
+      # state the bundled npm version, so this isn't left to chance. Floated
+      # on the 11.x line, not @latest: npm 12 shipped ~2 weeks ago and
+      # changed install-script security defaults -- not proven enough yet
+      # for this pipeline. Not pinned to an exact patch either, so this
+      # doesn't need manual bumps for routine 11.x patches (same tracking
+      # style as node-version/go-version elsewhere in this repo).
+      - name: Ensure npm >= 11.5.1 (trusted publishing floor)
+        run: npm install -g npm@11
 
       # package.json ships with a 0.0.0 placeholder in git; the real version
       # is always the tag that triggered this run, stripped of its "v" (npm
