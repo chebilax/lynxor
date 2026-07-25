@@ -198,6 +198,10 @@ Ciblé explicitement, comme prévu dans le plan séquencé : `plugin` (0% avant,
 
 **Non traité ici, suivi séparé** : `cli` (10.2%) et `output` (33.3%) restent bas mais n'étaient pas explicitement nommés dans le plan de l'étape 7 — ils demandent un style de test différent (intégration Cobra/capture d'IO plutôt que des fixtures unitaires), pas ajouté dans ce même effort pour ne pas mélanger les deux approches.
 
+## Issue #27 — cross-référencement introduction/suppression via `Context`, revalidé contre un vrai repo
+
+Le fix ([ADR 0023](decisions/0023-githistory-context-crossref.md)) a été revalidé contre le même vrai clone de `gin-gonic/gin` qui avait initialement confirmé le problème (pas juste contre les fixtures synthétiques des nouveaux tests) : les 3 paires introduction+suppression réelles du repo portent maintenant le bon cross-référencement de commit dans `Finding.Context`, et `testdata/certificate/key.pem` (toujours présent dans l'arbre de travail actuel — une situation différente, pas une paire propre) ne reçoit correctement aucun `Context` ajouté. Rendu CLI vérifié sur un petit repo de fixture local : le cross-référencement s'affiche correctement des deux côtés sans aucune modification à `output/cli.go`/`output/html.go`.
+
 ## Où sont les chiffres
 
 `docs/benchmarks.md` — table append-only, un run par phase/PR. Ce fichier-ci dit *quoi* tester et *pourquoi* ; benchmarks.md dit *ce qui a été mesuré, quand*.
