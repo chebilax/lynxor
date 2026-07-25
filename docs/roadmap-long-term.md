@@ -72,7 +72,7 @@ Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 
 ---
 
-## ✅ Fait (partiellement — publication npm non testée en réel) — Package npm de distribution
+## ✅ Fait — Package npm de distribution
 
 **Objectif** : `npm install -g lynxor` sans Go installé, en s'appuyant sur les binaires précompilés de l'entrée précédente.
 
@@ -81,6 +81,8 @@ Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 **Validé, pas juste écrit — avec une limite assumée** : `scripts/install.js` exécuté réellement contre un second tag jetable (`v0.0.0-npm-test`, supprimé après vérification) — téléchargement, vérification de checksum, extraction, et un vrai `reposcan scan .` à travers `bin/reposcan.js` (noms d'époque, avant le renommage Lynxor), tout correct. **Ce qui n'a pas été testé au moment de cette entrée** : le job `publish-npm` lui-même — ni le secret `NPM_TOKEN` (pas encore configuré côté GitHub) ni un vrai `npm publish` n'avaient été exercés.
 
 **Mise à jour** : le premier vrai tag (`v1.1.0`, sous le nom `reposcan`) a confirmé l'échec attendu — `publish-npm` a bien échoué faute de `NPM_TOKEN`, sans effet de bord, pendant que le job `release`/GoReleaser réussissait normalement (6 assets réels en ligne). Le premier `npm publish` réel n'a donc encore jamais eu lieu, ni sous `reposcan` ni sous `lynxor` — il se fera directement sous `lynxor` une fois `NPM_TOKEN` configuré et un nouveau tag coupé sous le module renommé (voir [ADR 0022](decisions/0022-rename-reposcan-to-lynxor.md)).
+
+**Mise à jour finale — trusted publishing (OIDC) au lieu de `NPM_TOKEN`, deux bugs réels trouvés et corrigés, distribution close** : `NPM_TOKEN` finalement jamais configuré, remplacé par le trusted publishing npm. Deux échecs réels avant le premier succès, chacun avec sa vraie cause : (1) `actions/setup-node@v7` écrivait une ligne `_authToken` cassée dans `.npmrc` dès que `registry-url` était renseigné, empêchant toute tentative OIDC (`401`/`404`) — corrigé en ne renseignant plus `registry-url` ; (2) la config Trusted Publisher sur npmjs.com avait été remplie mais jamais sauvegardée côté npm (`ENEEDAUTH`) — pas un bug de ce repo. Une fois les deux réglés, `v1.1.2` a publié `lynxor@1.1.2` pour de vrai (`published ... by GitHub Actions`, pas un token humain). Validation finale en environnement propre sur les trois canaux : `go install`, `npm install -g lynxor`, `brew tap chebilax/lynxor && brew install lynxor` — tous verts.
 
 Détails et alternatives écartées : [ADR 0021](decisions/0021-npm-distribution.md).
 
