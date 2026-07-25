@@ -17,9 +17,9 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # Scoped, not write-all (which reposcan's own cicd analyzer would flag) --
+    # Scoped, not write-all (which lynxor's own cicd analyzer would flag) --
     # only the one permission GoReleaser actually needs to create a release
-    # and upload assets. repoaudit-self-check.yml stays read-only; this is
+    # and upload assets. lynxor-self-check.yml stays read-only; this is
     # the only job in this repo that legitimately needs write access.
     permissions:
       contents: write

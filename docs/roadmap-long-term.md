@@ -1,4 +1,4 @@
-# 🌍 Roadmap long terme — RepoScan
+# 🌍 Roadmap long terme — Lynxor
 
 **Arrêt délibéré, pas un simple "à suivre"** : depuis le GitHub Action et les intégrations CI, le projet est considéré stable — v1.0 + GitHub Action + intégrations CI est l'état de référence, tant qu'aucun vrai point de friction ou vraie demande ne se présente. Ça vaut pour n'importe quel item de cette liste (marketplace de plugins, extension VSCode, SaaS) ou une idée qui n'y figure même pas encore. Ce n'est pas une pause temporaire en attendant de dérouler chaque item dans l'ordre "quand on aura le temps" — c'est un choix délibéré de ne pas avancer cette liste par défaut, et de ne la reprendre que sur un signal réel, pas sur l'inertie de la roadmap elle-même. La distribution via Homebrew tap, ajoutée après cet arrêt, est exactement ce genre de signal réel — une demande explicite, pas une reprise de la liste par défaut.
 
@@ -13,14 +13,14 @@ Ce document couvre ce qui vient après le v1.0 (Phases 1-5, voir `vision.md`).
 ### Scope MVP
 
 ```yaml
-- uses: reposcan/action@v1
+- uses: lynxor/action@v1
   with:
-    fail-on-new: true    # utilise `reposcan diff` si base-ref/head-ref détectés (PR), sinon `reposcan scan`
+    fail-on-new: true    # utilise `lynxor diff` si base-ref/head-ref détectés (PR), sinon `lynxor scan`
 ```
 
-- Action composite (pas de runtime custom) : installe le binaire `reposcan` déjà existant, l'exécute, expose le code de sortie.
-- Sur une pull request : utilise `reposcan diff <base> <head>` (Phase 3, déjà livré) — le mode conçu précisément pour ce cas d'usage.
-- Hors PR (push sur une branche) : bascule sur `reposcan scan . --format json`, publié en artifact de build.
+- Action composite (pas de runtime custom) : installe le binaire `lynxor` déjà existant, l'exécute, expose le code de sortie.
+- Sur une pull request : utilise `lynxor diff <base> <head>` (Phase 3, déjà livré) — le mode conçu précisément pour ce cas d'usage.
+- Hors PR (push sur une branche) : bascule sur `lynxor scan . --format json`, publié en artifact de build.
 - Aucune nouvelle feature côté CLI — ce travail est du packaging pur autour de ce qui existe déjà (`diff`, `--format json`).
 
 ### Pourquoi ce n'est pas un audit de conception comme Phase 4
@@ -29,8 +29,8 @@ Contrairement au Plugin System, il n'y a pas de code tiers non fiable à isoler 
 
 ### Critère de sortie — validé
 
-- `fail-on-new: true` fait échouer le check GitHub exactement comme `reposcan diff` en local (même code de sortie, même sémantique) — vérifié par un vrai run CI, pas seulement en local.
-- Testé sur ce repo lui-même en conditions CI réelles via `.github/workflows/reposcan-self-check.yml` (les trois chemins : PR/diff, push/scan, `workflow_dispatch`) — deux vrais bugs trouvés et corrigés en cours de route (SHA de merge éphémère, fraîcheur de sum.golang.org). Voir [docs/decisions/0011-github-action.md](decisions/0011-github-action.md).
+- `fail-on-new: true` fait échouer le check GitHub exactement comme `lynxor diff` en local (même code de sortie, même sémantique) — vérifié par un vrai run CI, pas seulement en local.
+- Testé sur ce repo lui-même en conditions CI réelles via `.github/workflows/lynxor-self-check.yml` (les trois chemins : PR/diff, push/scan, `workflow_dispatch`) — deux vrais bugs trouvés et corrigés en cours de route (SHA de merge éphémère, fraîcheur de sum.golang.org). Voir [docs/decisions/0011-github-action.md](decisions/0011-github-action.md).
 
 ---
 
@@ -44,17 +44,19 @@ Snippets documentés (`docs/ci-integrations.md`), pas un artefact publié (pas d
 
 **N'apparaissait dans aucun des deux documents de roadmap avant cette entrée** — ni `vision.md` ni ce fichier. Ajouté explicitement ici avant tout code, pour ne pas perdre la décision comme le corpus de test de la Phase 1 a failli l'être.
 
-**Objectif** : installer `reposcan` sans cloner le repo ni avoir Go préinstallé manuellement — Homebrew gère la dépendance de build lui-même. Fonctionne sur Linux et macOS (Homebrew, pas seulement macOS).
+**Objectif** : installer `lynxor` sans cloner le repo ni avoir Go préinstallé manuellement — Homebrew gère la dépendance de build lui-même. Fonctionne sur Linux et macOS (Homebrew, pas seulement macOS).
 
-**Scope** : repo séparé [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan) (convention Homebrew), un seul fichier `Formula/reposcan.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés pour ce chemin-là, même quand GoReleaser est arrivé plus tard (voir plus bas) : décision reconfirmée, pas juste un oubli.
+**Scope** : repo séparé [xchebila/homebrew-lynxor](https://github.com/xchebila/homebrew-lynxor) (convention Homebrew), un seul fichier `Formula/lynxor.rb`. La formula pointe vers un tarball de tag publié, build avec `go build` (`depends_on "go" => :build`) — pas de binaires précompilés pour ce chemin-là, même quand GoReleaser est arrivé plus tard (voir plus bas) : décision reconfirmée, pas juste un oubli.
 
 **Prérequis découvert avant de coder** : `--version` n'existait pas sur le binaire (vérifié empiriquement : `unknown flag: --version`) — ajouté dans ce même travail plutôt qu'après coup (ADR 0013).
 
-**Écart découvert en cours de route, puis corrigé** : la formula pointait d'abord vers `v1.0.0`, qui précède `--version` — `--version` restait donc vide de sens pour quiconque installait RepoScan via `go install` ou la formula, pas seulement pour le test de la formula elle-même. Corrigé en coupant `v1.0.1` immédiatement après le merge de cette PR, en repointant la formula dessus (`sha256` recalculé, testée en local à nouveau), et en mettant à jour le README (`go install ...@v1.0.1`). Le `test do` de la formula vérifie maintenant réellement `reposcan --version`, plus le repli `scan --help`.
+**Écart découvert en cours de route, puis corrigé** : la formula pointait d'abord vers `v1.0.0`, qui précède `--version` — `--version` restait donc vide de sens pour quiconque installait Lynxor via `go install` ou la formula, pas seulement pour le test de la formula elle-même. Corrigé en coupant `v1.0.1` immédiatement après le merge de cette PR, en repointant la formula dessus (`sha256` recalculé, testée en local à nouveau), et en mettant à jour le README (`go install ...@v1.0.1`). Le `test do` de la formula vérifie maintenant réellement `lynxor --version`, plus le repli `scan --help`.
 
 **Validé, pas juste écrit** : `brew tap` + `brew install --build-from-source` + `brew test` exécutés réellement en local avant de pousser la formula — les trois verts. Commande d'installation documentée dans le README principal, à côté de `go install` (qui n'existait pas non plus comme instruction directe utilisateur avant cette même entrée — ajouté au passage).
 
-**Renommage RepoAudit → RepoScan (avant publication)** : le tap est passé à [xchebila/homebrew-reposcan](https://github.com/xchebila/homebrew-reposcan), `Formula/reposcan.rb`, pointant vers `v1.0.2` — le premier tag coupé sous le module renommé (`v1.0.0` et `v1.0.1` déclarent encore `github.com/xchebila/repoaudit` dans leur `go.mod`, donc incompatibles avec `go install github.com/xchebila/reposcan@...` quel que soit le tag demandé, indépendamment de tout redirect GitHub — vérifié empiriquement : `go install ...@v1.0.1` échoue avec `module declares its path as: github.com/xchebila/repoaudit but was required as: github.com/xchebila/reposcan`). Même triple validation locale refaite sur la nouvelle formula avant de la pousser. L'ancien tap `homebrew-repoaudit` est à supprimer — bloqué : le token `gh` de cet environnement n'a pas le scope `delete_repo`, suppression à faire manuellement.
+**Renommage RepoAudit → RepoScan (avant publication, 2026-07-24)** : le tap est passé à `xchebila/homebrew-reposcan`, `Formula/reposcan.rb`, pointant vers `v1.0.2` — le premier tag coupé sous le module renommé (`v1.0.0` et `v1.0.1` déclaraient encore `github.com/xchebila/repoaudit` dans leur `go.mod`, donc incompatibles avec `go install github.com/xchebila/reposcan@...` quel que soit le tag demandé, indépendamment de tout redirect GitHub — vérifié empiriquement : `go install ...@v1.0.1` échouait avec `module declares its path as: github.com/xchebila/repoaudit but was required as: github.com/xchebila/reposcan`). Même triple validation locale refaite sur la nouvelle formula avant de la pousser. L'ancien tap `homebrew-repoaudit` restait à supprimer — bloqué à l'époque : le token `gh` de cet environnement n'avait pas le scope `delete_repo`, suppression faite manuellement depuis.
+
+**Renommage RepoScan → Lynxor** : mêmes mécaniques, même contrainte technique (le tap et le module doivent être re-pointés sous un nouveau tag). Détails : [entrée dédiée plus bas](#-fait--renommage-reposcan--lynxor) et [ADR 0022](decisions/0022-rename-reposcan-to-lynxor.md).
 
 ---
 
@@ -64,7 +66,7 @@ Snippets documentés (`docs/ci-integrations.md`), pas un artefact publié (pas d
 
 **Scope** : `.goreleaser.yaml` + `.github/workflows/release.yml`, déclenché sur push de tag `v*`. `CGO_ENABLED=0` (aucune dépendance cgo dans ce projet, vérifié par un vrai build avant d'écrire la config). Uniquement des binaires GitHub Release — pas de Docker, pas de publication automatique sur le tap Homebrew, pas de `.deb`/`.rpm` : le tap reste géré à la main (voir entrée précédente), même raisonnement que pour le GitHub Action (ADR 0011).
 
-**Validé, pas juste écrit** : `goreleaser build`/`release --snapshot` en local d'abord, puis un vrai tag jetable (`v0.0.0-goreleaser-test`) poussé pour déclencher `release.yml` pour de vrai sur GitHub Actions — la release générée contenait les 6 archives attendues (`reposcan_<os>_<arch>.tar.gz`/`.zip`) plus `checksums.txt`, avant suppression du tag et de la release de test.
+**Validé, pas juste écrit** : `goreleaser build`/`release --snapshot` en local d'abord, puis un vrai tag jetable (`v0.0.0-goreleaser-test`) poussé pour déclencher `release.yml` pour de vrai sur GitHub Actions — la release générée contenait les 6 archives attendues (`lynxor_<os>_<arch>.tar.gz`/`.zip`) plus `checksums.txt`, avant suppression du tag et de la release de test.
 
 Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 
@@ -72,13 +74,31 @@ Détails et alternatives écartées : [ADR 0020](decisions/0020-goreleaser.md).
 
 ## ✅ Fait (partiellement — publication npm non testée en réel) — Package npm de distribution
 
-**Objectif** : `npm install -g reposcan` sans Go installé, en s'appuyant sur les binaires précompilés de l'entrée précédente.
+**Objectif** : `npm install -g lynxor` sans Go installé, en s'appuyant sur les binaires précompilés de l'entrée précédente.
 
-**Scope** : sous-répertoire `npm/` de ce repo (`package.json`, `bin/reposcan.js`, `scripts/install.js`). `postinstall` télécharge l'archive GitHub Release correspondant à `process.platform`/`process.arch`, vérifie son SHA256 contre `checksums.txt`, extrait via le `tar` système (zéro dépendance npm — bsdtar sur Windows depuis 10 1803 gère aussi le zip). Choix explicitement écarté : les sous-paquets `optionalDependencies` par plateforme (pattern esbuild/swc) — plus robuste mais pas ce que le plan demandait, pas rouvert sans besoin identifié. Publication via un job `publish-npm` (`.github/workflows/release.yml`, `needs: release`) qui fixe la version depuis le tag puis `npm publish`.
+**Scope** : sous-répertoire `npm/` de ce repo (`package.json`, `bin/lynxor.js`, `scripts/install.js`). `postinstall` télécharge l'archive GitHub Release correspondant à `process.platform`/`process.arch`, vérifie son SHA256 contre `checksums.txt`, extrait via le `tar` système (zéro dépendance npm — bsdtar sur Windows depuis 10 1803 gère aussi le zip). Choix explicitement écarté : les sous-paquets `optionalDependencies` par plateforme (pattern esbuild/swc) — plus robuste mais pas ce que le plan demandait, pas rouvert sans besoin identifié. Publication via un job `publish-npm` (`.github/workflows/release.yml`, `needs: release`) qui fixe la version depuis le tag puis `npm publish`.
 
-**Validé, pas juste écrit — avec une limite assumée** : `scripts/install.js` exécuté réellement contre un second tag jetable (`v0.0.0-npm-test`, supprimé après vérification) — téléchargement, vérification de checksum, extraction, et un vrai `reposcan scan .` à travers `bin/reposcan.js`, tout correct. **Ce qui n'a pas été testé** : le job `publish-npm` lui-même — ni le secret `NPM_TOKEN` (pas encore configuré côté GitHub au moment de cette entrée) ni un vrai `npm publish` n'ont été exercés, un `npm unpublish` public n'étant pas une opération propre à répéter comme un tag/release GitHub jetable. Le premier tag réel post-merge sera donc le premier vrai test de `publish-npm`.
+**Validé, pas juste écrit — avec une limite assumée** : `scripts/install.js` exécuté réellement contre un second tag jetable (`v0.0.0-npm-test`, supprimé après vérification) — téléchargement, vérification de checksum, extraction, et un vrai `reposcan scan .` à travers `bin/reposcan.js` (noms d'époque, avant le renommage Lynxor), tout correct. **Ce qui n'a pas été testé au moment de cette entrée** : le job `publish-npm` lui-même — ni le secret `NPM_TOKEN` (pas encore configuré côté GitHub) ni un vrai `npm publish` n'avaient été exercés.
+
+**Mise à jour** : le premier vrai tag (`v1.1.0`, sous le nom `reposcan`) a confirmé l'échec attendu — `publish-npm` a bien échoué faute de `NPM_TOKEN`, sans effet de bord, pendant que le job `release`/GoReleaser réussissait normalement (6 assets réels en ligne). Le premier `npm publish` réel n'a donc encore jamais eu lieu, ni sous `reposcan` ni sous `lynxor` — il se fera directement sous `lynxor` une fois `NPM_TOKEN` configuré et un nouveau tag coupé sous le module renommé (voir [ADR 0022](decisions/0022-rename-reposcan-to-lynxor.md)).
 
 Détails et alternatives écartées : [ADR 0021](decisions/0021-npm-distribution.md).
+
+---
+
+## ✅ Fait — Renommage RepoScan → Lynxor
+
+**Contexte, différent du premier renommage** : RepoAudit → RepoScan avait été chronométré explicitement *avant* toute publication. Celui-ci arrive après : `action.yml` est un GitHub Action utilisable, le tap `homebrew-reposcan` existe, et `v1.1.0` est la première vraie GitHub Release de ce projet. Signalé explicitement avant de coder ; démarré quand même, sur confirmation, en parallèle de la validation encore ouverte du premier `npm publish`.
+
+**Scope** : mêmes mécaniques que le premier renommage — inventaire par `git grep`, remplacement en plusieurs passes (`RepoScan`→`Lynxor`, `reposcan`→`lynxor`, puis `REPOSCAN`→`LYNXOR` après une vérification initiale incomplète), renommage de 3 fichiers/dossiers (`.claude/skills/`, le self-check workflow, `npm/bin/`), champ de protocole plugin `reposcan_version`→`lynxor_version`, golden file HTML régénéré via `-update`.
+
+**Problème découvert en creusant, corrigé avant de continuer** : le remplacement global aveugle a failli réécrire un récit historique dans `roadmap-long-term.md` (le paragraphe qui documente le premier renommage, avec un vrai message d'erreur cité) — transformé en une fausse affirmation "RepoAudit → Lynxor". Corrigé manuellement ; ce paragraphe reste figé sur les noms réels de l'époque. Un second stale antérieur et indépendant (`repoaudit-self-check.yml` mentionné dans ADR 0020/`release.yml`, déjà faux avant même ce renommage) corrigé au passage.
+
+**Validé, pas juste écrit** : `make check` complet vert après le renommage du module Go ; binaire réel construit et exécuté (`--version`, `scan .` — score inchangé 97/100 —, `--format html`/`--format json`, branding correct).
+
+**Pas fait ici, suivis séparés** : renommage du repo GitHub, nouveau tag réel sous `github.com/xchebila/lynxor` (aucun tag existant ne résout sous ce module — contrainte technique, pas un choix), nouveau tap `homebrew-lynxor`, premier `npm publish` réel (sera directement `lynxor`, jamais `reposcan`).
+
+Détails : [ADR 0022](decisions/0022-rename-reposcan-to-lynxor.md).
 
 ---
 
@@ -112,7 +132,7 @@ Détails et alternatives écartées : [ADR 0021](decisions/0021-npm-distribution
 
 **La vraie question, pas encore posée** : quel problème un SaaS résout-il que CLI + GitHub Action ne résolvent pas déjà ? Le vision.md le qualifie lui-même de "non obligatoire" — ce n'est pas un engagement, c'est une option qui n'a pas encore de justification claire.
 
-**Tension avec la philosophie du projet** : un SaaS introduit un hébergement, potentiellement des comptes utilisateurs, une surface d'attaque et une charge opérationnelle sans rapport avec "CLI local, zéro-config, zéro dépendance" qui est au cœur de RepoScan depuis le vision.md original. Avant tout cadrage technique, ce point mérite une vraie réponse écrite (dans un ADR ou équivalent) à la question "pourquoi", pas seulement "comment".
+**Tension avec la philosophie du projet** : un SaaS introduit un hébergement, potentiellement des comptes utilisateurs, une surface d'attaque et une charge opérationnelle sans rapport avec "CLI local, zéro-config, zéro dépendance" qui est au cœur de Lynxor depuis le vision.md original. Avant tout cadrage technique, ce point mérite une vraie réponse écrite (dans un ADR ou équivalent) à la question "pourquoi", pas seulement "comment".
 
 ---
 

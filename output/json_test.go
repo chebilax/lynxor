@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 func TestWriteJSONReport_Golden(t *testing.T) {

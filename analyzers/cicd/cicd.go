@@ -1,4 +1,4 @@
-// Package cicd implements RepoScan's Phase 3 GitHub Actions detection
+// Package cicd implements Lynxor's Phase 3 GitHub Actions detection
 // rules: overly broad workflow permissions, actions pinned to a mutable
 // branch ref instead of a version/SHA, and secrets echoed into build logs.
 // Hardcoded secret values in a workflow file need no rule here — a
@@ -14,7 +14,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 type Analyzer struct{}

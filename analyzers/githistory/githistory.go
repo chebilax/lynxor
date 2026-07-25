@@ -15,8 +15,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 
-	"github.com/xchebila/reposcan/analyzers/secrets"
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/analyzers/secrets"
+	"github.com/xchebila/lynxor/core"
 )
 
 // DefaultBudget bounds the default (no-flag) scan by wall-clock time, not

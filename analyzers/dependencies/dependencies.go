@@ -16,7 +16,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 // Dependency is one package+version pinned by a manifest file.

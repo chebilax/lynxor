@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xchebila/reposcan/cli"
+	"github.com/xchebila/lynxor/cli"
 )
 
 // version is overridden at build time via -ldflags "-X main.version=...";

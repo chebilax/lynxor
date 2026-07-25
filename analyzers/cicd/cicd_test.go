@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 func TestRun(t *testing.T) {
