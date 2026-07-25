@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xchebila/lynxor/analyzers/diffmode"
-	"github.com/xchebila/lynxor/output"
+	"github.com/chebilax/lynxor/analyzers/diffmode"
+	"github.com/chebilax/lynxor/output"
 )
 
 func newDiffCmd() *cobra.Command {

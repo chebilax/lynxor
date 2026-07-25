@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 type rule struct {

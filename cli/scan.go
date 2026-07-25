@@ -8,13 +8,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xchebila/lynxor/analyzers"
-	"github.com/xchebila/lynxor/analyzers/cicd"
-	"github.com/xchebila/lynxor/analyzers/dependencies"
-	"github.com/xchebila/lynxor/analyzers/githistory"
-	"github.com/xchebila/lynxor/analyzers/plugin"
-	"github.com/xchebila/lynxor/core"
-	"github.com/xchebila/lynxor/output"
+	"github.com/chebilax/lynxor/analyzers"
+	"github.com/chebilax/lynxor/analyzers/cicd"
+	"github.com/chebilax/lynxor/analyzers/dependencies"
+	"github.com/chebilax/lynxor/analyzers/githistory"
+	"github.com/chebilax/lynxor/analyzers/plugin"
+	"github.com/chebilax/lynxor/core"
+	"github.com/chebilax/lynxor/output"
 )
 
 func newScanCmd() *cobra.Command {

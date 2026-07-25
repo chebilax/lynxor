@@ -18,7 +18,7 @@ Accepté (2026-07-24).
 
 ## Décision : uniquement des binaires GitHub Release — pas de Docker, pas de packaging Homebrew/deb/rpm
 
-Le tap Homebrew (`xchebila/homebrew-lynxor`) reste maintenu à la main et testé en local avant chaque push (`brew install --build-from-source` + `brew test`) — laisser GoReleaser y publier directement court-circuiterait cette discipline déjà établie (et déjà utile : elle a trouvé un vrai écart de version avant ce jour). Docker et les paquets `.deb`/`.rpm` n'ont pas été demandés — ajoutés uniquement si un vrai besoin se présente, même principe que partout ailleurs dans ce projet.
+Le tap Homebrew (`chebilax/homebrew-lynxor`) reste maintenu à la main et testé en local avant chaque push (`brew install --build-from-source` + `brew test`) — laisser GoReleaser y publier directement court-circuiterait cette discipline déjà établie (et déjà utile : elle a trouvé un vrai écart de version avant ce jour). Docker et les paquets `.deb`/`.rpm` n'ont pas été demandés — ajoutés uniquement si un vrai besoin se présente, même principe que partout ailleurs dans ce projet.
 
 ## Décision : permissions scopées, pas `write-all` — et testé contre le propre analyzer `cicd` du projet
 

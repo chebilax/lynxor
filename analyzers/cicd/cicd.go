@@ -14,7 +14,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 type Analyzer struct{}

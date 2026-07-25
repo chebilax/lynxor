@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 // update regenerates every golden file in this package from the current

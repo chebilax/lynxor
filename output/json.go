@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/core"
 )
 
 // schemaVersion versions the JSON output independently of core.Finding's

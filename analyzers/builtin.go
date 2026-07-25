@@ -13,10 +13,10 @@
 package analyzers
 
 import (
-	"github.com/xchebila/lynxor/analyzers/cicd"
-	"github.com/xchebila/lynxor/analyzers/docker"
-	"github.com/xchebila/lynxor/analyzers/secrets"
-	"github.com/xchebila/lynxor/core"
+	"github.com/chebilax/lynxor/analyzers/cicd"
+	"github.com/chebilax/lynxor/analyzers/docker"
+	"github.com/chebilax/lynxor/analyzers/secrets"
+	"github.com/chebilax/lynxor/core"
 )
 
 // BuiltinAnalyzers returns a fresh slice of the built-in analyzers, in the
