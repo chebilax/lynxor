@@ -96,7 +96,9 @@ Détails et alternatives écartées : [ADR 0021](decisions/0021-npm-distribution
 
 **Validé, pas juste écrit** : `make check` complet vert après le renommage du module Go ; binaire réel construit et exécuté (`--version`, `scan .` — score inchangé 97/100 —, `--format html`/`--format json`, branding correct).
 
-**Pas fait ici, suivis séparés** : renommage du repo GitHub, nouveau tag réel sous `github.com/xchebila/lynxor` (aucun tag existant ne résout sous ce module — contrainte technique, pas un choix), nouveau tap `homebrew-lynxor`, premier `npm publish` réel (sera directement `lynxor`, jamais `reposcan`).
+**Pas fait dans ce commit, suivis séparés** : renommage du repo GitHub, nouveau tag réel sous `github.com/xchebila/lynxor` (aucun tag existant ne résout sous ce module — contrainte technique, pas un choix), nouveau tap `homebrew-lynxor`, premier `npm publish` réel (sera directement `lynxor`, jamais `reposcan`).
+
+**Mise à jour (2026-07-25)** : tous les suivis ci-dessus résolus dans l'heure suivant le merge, sauf le npm publish. Repo GitHub renommé (par l'utilisateur). L'ancien `v1.1.0` (coupé avant ce renommage, assets `reposcan_*` déjà publiés) supprimé — tag et release — et recoupé sur le nouveau commit renommé, plutôt que d'utiliser un autre numéro (décision utilisateur explicite : un seul `v1.1.0` public aura jamais existé, celui-ci). GoReleaser a tourné dessus pour de vrai : 6 assets `lynxor_*` en ligne. Formule Homebrew mise à jour (`reposcan.rb`→`lynxor.rb`, url/sha256 sur le vrai `v1.1.0`) et validée deux fois en conditions réelles (tap local, puis après push vers le vrai tap). Tap renommé `homebrew-lynxor` via l'API GitHub (scope `repo`, pas besoin de `delete_repo`). Revalidé avec la commande exacte du README : `brew tap xchebila/lynxor && brew install lynxor` — vert. README corrigé pour `go install .../lynxor@v1.1.0` (vérifié : résout correctement).
 
 Détails : [ADR 0022](decisions/0022-rename-reposcan-to-lynxor.md).
 
