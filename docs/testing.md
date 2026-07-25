@@ -173,7 +173,9 @@ Le HTML généré lui-même se valide en deux temps, aucun des deux par simple l
 
 `npm/scripts/install.js` (ADR 0021) a été exécuté réellement (pas juste relu) contre un second tag jetable (`v0.0.0-npm-test`, poussé puis supprimé après vérification) : téléchargement des vrais assets GitHub Release, vérification du SHA256 contre `checksums.txt`, extraction via `tar` système, `chmod`, puis un vrai `lynxor --version` et `lynxor scan .` exécutés à travers `bin/lynxor.js` — tout correct sur darwin/arm64 (seule plateforme testable dans cet environnement de dev).
 
-Limite explicitement assumée, pas cachée : le job `publish-npm` lui-même (`.github/workflows/release.yml`) n'a pas été exercé pour de vrai — ni le secret `NPM_TOKEN` (absent au moment de cette entrée, `gh secret list` le confirme vide) ni un vrai `npm publish` n'ont été testés, contrairement à `release.yml`/GoReleaser où le tag-jetable-puis-suppression fonctionne proprement. Publier pour de vrai sur le registre npm public n'est pas une opération aussi propre à annuler (`npm unpublish` a des restrictions, contrairement à `gh release delete`) — le premier tag réel après ce merge sera donc le premier vrai test de `publish-npm`, une fois `NPM_TOKEN` configuré.
+Limite explicitement assumée, pas cachée : le job `publish-npm` lui-même (`.github/workflows/release.yml`) n'a pas été exercé pour de vrai. Publier pour de vrai sur le registre npm public n'est pas une opération aussi propre à annuler (`npm unpublish` a des restrictions, contrairement à `gh release delete`) — le prochain tag réel sera donc le premier vrai test de `publish-npm`.
+
+**Mise à jour** : `NPM_TOKEN` n'a finalement jamais été configuré — remplacé par le trusted publishing npm (OIDC) avant le premier essai réel (voir la mise à jour d'ADR 0021). `id-token: write` scopé au job, `actions/setup-node` passé à `@v7`/Node 22 (planchers exigés : npm CLI ≥ 11.5.1, Node ≥ 22.14.0), plus de `NODE_AUTH_TOKEN`.
 
 ## Renommage de compte GitHub xchebila → chebilax (2026-07-26)
 

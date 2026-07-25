@@ -47,5 +47,10 @@ Les deux jobs se déclenchent sur le même `push: tags: v*`. Sans `needs: releas
 ## Conséquences
 
 - Le nom de paquet npm `lynxor` était disponible (vérifié via `npm view lynxor`, 404 avant publication) — pas de collision de nom à gérer.
-- Le secret `NPM_TOKEN` doit être configuré côté GitHub (repo settings → secrets) avant qu'un vrai tag ne déclenche une vraie publication npm — pas encore fait au moment de cet ADR, à faire avant le premier tag réel post-merge.
-- Pas encore testé : un vrai `npm publish` (le job `publish-npm` n'a pas été exercé pour de vrai, seul `install.js` a été validé directement contre des assets réels — publier réellement sur le registre npm public depuis un tag jetable aurait pollué le registre de façon non supprimable, contrairement à une release GitHub).
+- Pas encore testé au moment de l'écriture initiale : un vrai `npm publish` (le job `publish-npm` n'avait pas été exercé pour de vrai, seul `install.js` avait été validé directement contre des assets réels — publier réellement sur le registre npm public depuis un tag jetable aurait pollué le registre de façon non supprimable, contrairement à une release GitHub).
+
+## Mise à jour — `NPM_TOKEN` remplacé par le trusted publishing OIDC, avant le premier `npm publish` réel
+
+Décision initiale (secret `NPM_TOKEN` à configurer côté GitHub) jamais exécutée : avant de le faire, npm a proposé le trusted publishing (OIDC) comme option à la configuration du package sur npmjs.com — pas de token longue durée à générer, stocker, ni faire tourner. Adopté à la place, aucun `NPM_TOKEN` n'existe ni n'existera dans les secrets de ce repo.
+
+Mécaniquement (vérifié contre la doc npm réelle, pas supposé) : le job `publish-npm` déclare `permissions: id-token: write` (scopé à ce job, pas au workflow, même discipline que `contents: write` pour le job `release`) ; `actions/setup-node` passé de `@v4`/Node 20 à `@v7`/Node 22 (le trusted publishing exige npm CLI ≥ 11.5.1 et Node ≥ 22.14.0, Node 20 est sous les deux planchers) ; l'étape `Publish` n'a plus d'`env: NODE_AUTH_TOKEN` — l'authentification passe par le jeton OIDC, pas un secret. L'attestation de provenance est automatique sous trusted publishing, pas besoin du flag `--provenance`.
