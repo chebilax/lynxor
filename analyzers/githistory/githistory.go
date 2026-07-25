@@ -90,6 +90,7 @@ func Scan(repoPath string, opts Options) (Result, error) {
 	analyzer := secrets.New()
 	visited := map[plumbing.Hash]bool{}
 	result := Result{}
+	var occs []occurrence
 
 	// Counting reachable commits is a plain walk of commit objects with no
 	// tree diffing or blob reads — orders of magnitude cheaper than the
@@ -140,7 +141,7 @@ func Scan(repoPath string, opts Options) (Result, error) {
 		// historical and stays in scope.
 		skipTo := result.CommitsScanned == 0
 		result.CommitsScanned++
-		result.Findings = append(result.Findings, scanCommit(analyzer, c, skipTo)...)
+		occs = append(occs, scanCommit(analyzer, c, skipTo)...)
 
 		if opts.FullHistory && opts.OnProgress != nil && result.CommitsScanned%progressInterval == 0 {
 			opts.OnProgress(result.CommitsScanned, totalCommits)
@@ -148,10 +149,90 @@ func Scan(repoPath string, opts Options) (Result, error) {
 	}
 
 	if opts.FullHistory {
-		result.Findings = append(result.Findings, scanDangling(analyzer, repo, visited)...)
+		occs = append(occs, scanDangling(analyzer, repo, visited)...)
+	}
+
+	// Cross-reference an introduce+remove pair via Finding.Context rather
+	// than merging them into one Finding -- see issue #27. Mutates in
+	// place (occs holds pointers), so this must run before the final copy
+	// into result.Findings below.
+	pairOccurrences(occs)
+
+	result.Findings = make([]core.Finding, len(occs))
+	for i, o := range occs {
+		result.Findings[i] = *o.finding
 	}
 
 	return result, nil
+}
+
+// occurrence pairs a Finding with the blob it came from and which side of a
+// diff produced it (content appearing vs. disappearing) -- the extra
+// context scanCommit/scanDangling have on hand but core.Finding itself
+// doesn't carry, needed to cross-reference an introduction with its later
+// removal without guessing from the Finding fields alone (path + rule ID
+// isn't precise enough: two unrelated secrets of the same type in the same
+// file at different times must never be mis-paired -- see pairOccurrences).
+type occurrence struct {
+	finding      *core.Finding
+	blob         plumbing.Hash
+	introduction bool // true: the "to" side (content appears); false: the "from" side (content disappears)
+}
+
+// pairOccurrences cross-references an introduce+remove pair for the exact
+// same blob content via Finding.Context -- "also removed in commit X" /
+// "originally introduced in commit Y" -- without merging them into one
+// Finding or changing the reported count (see issue #27, ADR 0001: Context
+// is a non-authoritative triage hint, never something that changes
+// Severity or count). Matched on file path + blob hash, not just rule ID,
+// so two unrelated secrets of the same type in the same file at different
+// times are never mis-paired. Deliberately conservative: any group that
+// isn't exactly one introduction and one removal (a secret re-added later,
+// two distinct secrets removed together in one commit, ...) is left alone
+// rather than guessed at.
+func pairOccurrences(occs []occurrence) {
+	type key struct {
+		path string
+		blob plumbing.Hash
+	}
+	groups := map[key][]*occurrence{}
+	for i := range occs {
+		k := key{path: occs[i].finding.File, blob: occs[i].blob}
+		groups[k] = append(groups[k], &occs[i])
+	}
+
+	for _, group := range groups {
+		if len(group) != 2 {
+			continue
+		}
+		var intro, removal *occurrence
+		for _, o := range group {
+			if o.introduction {
+				intro = o
+			} else {
+				removal = o
+			}
+		}
+		if intro == nil || removal == nil {
+			continue
+		}
+		intro.finding.Context = addContext(intro.finding.Context, fmt.Sprintf("also removed in commit %s", shortHash(removal.finding.CommitHash)))
+		removal.finding.Context = addContext(removal.finding.Context, fmt.Sprintf("originally introduced in commit %s", shortHash(intro.finding.CommitHash)))
+	}
+}
+
+func addContext(existing, addition string) string {
+	if existing == "" {
+		return addition
+	}
+	return existing + " — " + addition
+}
+
+func shortHash(commitHash string) string {
+	if len(commitHash) > 7 {
+		return commitHash[:7]
+	}
+	return commitHash
 }
 
 // ErrNotAGitRepo signals repoPath has no .git to walk.
@@ -179,8 +260,8 @@ func countReachableCommits(repo *git.Repository) (int, error) {
 // the reachable-history walk didn't already cover. This is how a deleted
 // branch's commits — still on disk until `git gc` prunes them — get caught,
 // with no reflog parsing required.
-func scanDangling(analyzer *secrets.Analyzer, repo *git.Repository, visited map[plumbing.Hash]bool) []core.Finding {
-	var findings []core.Finding
+func scanDangling(analyzer *secrets.Analyzer, repo *git.Repository, visited map[plumbing.Hash]bool) []occurrence {
+	var occs []occurrence
 
 	allIter, err := repo.CommitObjects()
 	if err != nil {
@@ -193,11 +274,11 @@ func scanDangling(analyzer *secrets.Analyzer, repo *git.Repository, visited map[
 			return nil
 		}
 		visited[c.Hash] = true
-		findings = append(findings, scanCommit(analyzer, c, false)...)
+		occs = append(occs, scanCommit(analyzer, c, false)...)
 		return nil
 	})
 
-	return findings
+	return occs
 }
 
 // scanCommit diffs c against its first parent (root commits diff against an
@@ -211,7 +292,7 @@ func scanDangling(analyzer *secrets.Analyzer, repo *git.Repository, visited map[
 //
 // skipTo omits the "after" side of the diff — used for HEAD, whose "after"
 // tree is the current working tree and already covered by core.Scanner.
-func scanCommit(analyzer *secrets.Analyzer, c *object.Commit, skipTo bool) []core.Finding {
+func scanCommit(analyzer *secrets.Analyzer, c *object.Commit, skipTo bool) []occurrence {
 	tree, err := c.Tree()
 	if err != nil {
 		return nil
@@ -230,7 +311,7 @@ func scanCommit(analyzer *secrets.Analyzer, c *object.Commit, skipTo bool) []cor
 		return nil
 	}
 
-	var findings []core.Finding
+	var occs []occurrence
 	for _, change := range changes {
 		// Checked before Files() (which decompresses blobs) so a vendor
 		// bump touching thousands of third-party files costs nothing
@@ -262,13 +343,19 @@ func scanCommit(analyzer *secrets.Analyzer, c *object.Commit, skipTo bool) []cor
 		// full repo-relative path — using File.Name here made two
 		// same-named files in different directories print identically.
 		if from != nil {
-			findings = append(findings, scanBlob(analyzer, from, change.From.Name, c.Hash.String())...)
+			for _, f := range scanBlob(analyzer, from, change.From.Name, c.Hash.String()) {
+				f := f
+				occs = append(occs, occurrence{finding: &f, blob: from.Hash, introduction: false})
+			}
 		}
 		if to != nil {
-			findings = append(findings, scanBlob(analyzer, to, change.To.Name, c.Hash.String())...)
+			for _, f := range scanBlob(analyzer, to, change.To.Name, c.Hash.String()) {
+				f := f
+				occs = append(occs, occurrence{finding: &f, blob: to.Hash, introduction: true})
+			}
 		}
 	}
-	return findings
+	return occs
 }
 
 // Analyzer adapts Scan to core.RepoAnalyzer, so cli/scan.go can run it

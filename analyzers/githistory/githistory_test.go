@@ -3,12 +3,15 @@ package githistory
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+
+	"github.com/chebilax/lynxor/core"
 )
 
 // newRepo/commit mirror analyzers/diffmode/diffmode_test.go's fixture
@@ -89,6 +92,71 @@ func TestScan_FindsSecretDeletedInAnEarlierCommit(t *testing.T) {
 		}
 		if f.Category != "git-history" {
 			t.Errorf("Category = %q, want git-history", f.Category)
+		}
+	}
+}
+
+// TestScan_CrossReferencesIntroductionAndRemovalViaContext is the fix for
+// issue #27: the introduction and removal findings for the same secret
+// still report as two Findings (accurate: two real diff events), but each
+// now cross-references the other's commit via Context, so a reader isn't
+// left to notice on their own that these are the same incident.
+func TestScan_CrossReferencesIntroductionAndRemovalViaContext(t *testing.T) {
+	dir, repo := newRepo(t)
+	introduced := commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=" + fixtureAWSKey + "\n"})
+	removed := commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=safe\n"})
+
+	result, err := Scan(dir, Options{})
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	if len(result.Findings) != 2 {
+		t.Fatalf("got %d findings, want 2 -- pairing must not change the count, only add Context", len(result.Findings))
+	}
+
+	var introFinding, removalFinding *core.Finding
+	for i := range result.Findings {
+		f := &result.Findings[i]
+		switch f.CommitHash {
+		case introduced:
+			introFinding = f
+		case removed:
+			removalFinding = f
+		}
+	}
+	if introFinding == nil || removalFinding == nil {
+		t.Fatalf("expected one finding per commit, got %+v", result.Findings)
+	}
+	if !strings.Contains(introFinding.Context, shortHash(removed)) {
+		t.Errorf("introduction's Context = %q, want it to reference the removal commit %s", introFinding.Context, shortHash(removed))
+	}
+	if !strings.Contains(removalFinding.Context, shortHash(introduced)) {
+		t.Errorf("removal's Context = %q, want it to reference the introduction commit %s", removalFinding.Context, shortHash(introduced))
+	}
+}
+
+// TestScan_DoesNotPairWhenAmbiguous confirms pairOccurrences' conservative
+// bail-out: a secret introduced, removed, then re-introduced later (three
+// occurrences of the same blob, not a clean one-introduction-one-removal
+// pair) must not be guessed at -- no Context added for any of them, rather
+// than an arbitrary or misleading pairing.
+func TestScan_DoesNotPairWhenAmbiguous(t *testing.T) {
+	dir, repo := newRepo(t)
+	commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=" + fixtureAWSKey + "\n"})
+	commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=safe\n"})
+	commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=" + fixtureAWSKey + "\n"})
+	commit(t, repo, dir, map[string]string{"config.py": "AWS_KEY=safe-again\n"})
+
+	result, err := Scan(dir, Options{})
+	if err != nil {
+		t.Fatalf("Scan: %v", err)
+	}
+	if len(result.Findings) != 4 {
+		t.Fatalf("got %d findings, want 4 (introduced, removed, re-introduced, removed again): %+v", len(result.Findings), result.Findings)
+	}
+	for _, f := range result.Findings {
+		if f.Context != "" {
+			t.Errorf("commit %s: Context = %q, want empty -- 4 occurrences of the same blob is ambiguous, must not be paired", shortHash(f.CommitHash), f.Context)
 		}
 	}
 }
