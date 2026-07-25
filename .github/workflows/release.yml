@@ -92,6 +92,22 @@ jobs:
       - name: Ensure npm >= 11.5.1 (trusted publishing floor)
         run: npm install -g npm@11
 
+      # Temporary, to diagnose the v1.1.1 404: confirms the upgrade above
+      # actually took effect for this step's npm, and inspects the .npmrc
+      # setup-node generated (registry-url historically writes an
+      # _authToken line even with no NODE_AUTH_TOKEN set, which can leave
+      # npm thinking it has -- and should use -- an empty/invalid token
+      # instead of falling back to the OIDC handshake). No secrets in this
+      # output: NODE_AUTH_TOKEN was removed from this job entirely.
+      - name: Diagnose OIDC publish environment
+        run: |
+          echo "node: $(node --version)"
+          echo "npm: $(npm --version)"
+          echo "--- .npmrc ($NPM_CONFIG_USERCONFIG) ---"
+          cat "$NPM_CONFIG_USERCONFIG" || echo "(no .npmrc found)"
+          echo "--- npm whoami ---"
+          npm whoami || echo "(npm whoami failed -- expected if OIDC hasn't authenticated yet at this point)"
+
       # package.json ships with a 0.0.0 placeholder in git; the real version
       # is always the tag that triggered this run, stripped of its "v" (npm
       # versions don't take the leading "v" that every other build path in
