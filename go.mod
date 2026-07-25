@@ -1,4 +1,4 @@
-module github.com/xchebila/reposcan
+module github.com/xchebila/lynxor
 
 go 1.25.0
 

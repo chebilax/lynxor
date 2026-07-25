@@ -3,16 +3,16 @@ package secrets
 import (
 	"testing"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 // These fixture values are split across two (or more) Go string literals
 // joined with "+", instead of one contiguous literal. This test file is
-// itself part of the RepoScan repo, and RepoScan's own CI runs
-// `reposcan diff` against every PR (.github/workflows/reposcan-self-check.yml)
+// itself part of the Lynxor repo, and Lynxor's own CI runs
+// `lynxor diff` against every PR (.github/workflows/lynxor-self-check.yml)
 // -- a realistic-looking secret written as one plain string here would be
 // indistinguishable, byte-for-byte, from a real hardcoded credential once
-// committed, and reposcan would (correctly) flag its own test suite. The
+// committed, and lynxor would (correctly) flag its own test suite. The
 // split keeps the raw source bytes from ever containing the matching
 // substring contiguously, while the concatenated runtime value is still a
 // real match for the regex under test.

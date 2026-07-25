@@ -1,4 +1,4 @@
-// Package secrets implements RepoScan's Phase 1 detection rules: hardcoded
+// Package secrets implements Lynxor's Phase 1 detection rules: hardcoded
 // credentials in the working tree (not git history — that's Phase 2).
 package secrets
 
@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 type rule struct {

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 "use strict";
 
-// Downloads the reposcan binary matching this package's own version from
+// Downloads the lynxor binary matching this package's own version from
 // GitHub Releases (published by .goreleaser.yaml / release.yml), verifies it
 // against the release's checksums.txt, and extracts it into ../.bin.
-// bin/reposcan.js execs whatever ends up there -- this script's only job is
+// bin/lynxor.js execs whatever ends up there -- this script's only job is
 // to make sure the right binary is present and actually runs before install
 // finishes, so failures surface at `npm install` time, not at first use.
 
@@ -18,7 +18,7 @@ const PLATFORMS = { linux: "linux", darwin: "darwin", win32: "windows" };
 const ARCHES = { x64: "amd64", arm64: "arm64" };
 
 function fail(message) {
-  console.error(`reposcan: ${message}`);
+  console.error(`lynxor: ${message}`);
   process.exit(1);
 }
 
@@ -37,18 +37,18 @@ async function main() {
     fail(
       `unsupported platform/arch combination: ${process.platform}/${process.arch}. ` +
         `Supported: ${Object.keys(PLATFORMS).join(", ")} x ${Object.keys(ARCHES).join(", ")}. ` +
-        `Build from source instead: https://github.com/xchebila/reposcan#install--build`,
+        `Build from source instead: https://github.com/xchebila/lynxor#install--build`,
     );
   }
 
   const pkg = require("../package.json");
-  const version = process.env.REPOSCAN_INSTALL_VERSION || pkg.version;
+  const version = process.env.LYNXOR_INSTALL_VERSION || pkg.version;
   const tag = `v${version}`;
   const ext = platform === "windows" ? "zip" : "tar.gz";
-  const archiveName = `reposcan_${platform}_${arch}.${ext}`;
-  const base = `https://github.com/xchebila/reposcan/releases/download/${tag}`;
+  const archiveName = `lynxor_${platform}_${arch}.${ext}`;
+  const base = `https://github.com/xchebila/lynxor/releases/download/${tag}`;
 
-  console.log(`reposcan: fetching ${archiveName} (${tag})...`);
+  console.log(`lynxor: fetching ${archiveName} (${tag})...`);
   const [archive, checksums] = await Promise.all([
     download(`${base}/${archiveName}`),
     download(`${base}/checksums.txt`),
@@ -91,7 +91,7 @@ async function main() {
     fs.rmSync(archivePath, { force: true });
   }
 
-  const binName = platform === "windows" ? "reposcan.exe" : "reposcan";
+  const binName = platform === "windows" ? "lynxor.exe" : "lynxor";
   const binPath = path.join(destDir, binName);
   if (!fs.existsSync(binPath)) {
     fail(`${binName} not found in ${archiveName} after extraction`);
@@ -104,7 +104,7 @@ async function main() {
   if (check.status !== 0) {
     fail(`downloaded binary failed to run: ${check.stderr || check.error}`);
   }
-  console.log(`reposcan: installed ${check.stdout.trim()}`);
+  console.log(`lynxor: installed ${check.stdout.trim()}`);
 }
 
 main().catch((err) => fail(err.stack || String(err)));

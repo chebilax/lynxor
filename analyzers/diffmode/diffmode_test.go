@@ -11,8 +11,8 @@ import (
 )
 
 // Split across two literals so this file's own committed source never
-// contains the contiguous matching substring -- RepoScan's own CI runs
-// `reposcan diff` against this repo (.github/workflows/reposcan-self-check.yml),
+// contains the contiguous matching substring -- Lynxor's own CI runs
+// `lynxor diff` against this repo (.github/workflows/lynxor-self-check.yml),
 // and a plain literal here would be indistinguishable from a real
 // hardcoded key. See the longer explanation in analyzers/secrets/secrets_test.go.
 const (

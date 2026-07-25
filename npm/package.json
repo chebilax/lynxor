@@ -1,17 +1,17 @@
 {
-  "name": "reposcan",
+  "name": "lynxor",
   "version": "0.0.0",
-  "description": "A 10-second security sanity check for Git repositories -- committed secrets, exposed keys, risky Dockerfile patterns, CI/CD misconfigurations, and known-vulnerable dependencies. This package downloads the matching precompiled reposcan binary from GitHub Releases on install.",
+  "description": "A 10-second security sanity check for Git repositories -- committed secrets, exposed keys, risky Dockerfile patterns, CI/CD misconfigurations, and known-vulnerable dependencies. This package downloads the matching precompiled lynxor binary from GitHub Releases on install.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xchebila/reposcan.git",
+    "url": "git+https://github.com/xchebila/lynxor.git",
     "directory": "npm"
   },
-  "homepage": "https://github.com/xchebila/reposcan",
-  "bugs": "https://github.com/xchebila/reposcan/issues",
+  "homepage": "https://github.com/xchebila/lynxor",
+  "bugs": "https://github.com/xchebila/lynxor/issues",
   "bin": {
-    "reposcan": "bin/reposcan.js"
+    "lynxor": "bin/lynxor.js"
   },
   "files": [
     "bin",

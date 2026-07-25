@@ -6,7 +6,7 @@ Accepté (2026-07-24).
 
 ## Contexte
 
-Un plugin ne pouvait recevoir de configuration qu'via l'environnement ou un fichier qu'il découvre lui-même — aucun mécanisme direct côté RepoScan. Étape 2 d'une suite séquencée (après ADR 0017), avant le support npm.
+Un plugin ne pouvait recevoir de configuration qu'via l'environnement ou un fichier qu'il découvre lui-même — aucun mécanisme direct côté Lynxor. Étape 2 d'une suite séquencée (après ADR 0017), avant le support npm.
 
 ## Décision : adressé par `plugin_name`, pas par position
 

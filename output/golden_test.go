@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 // update regenerates every golden file in this package from the current

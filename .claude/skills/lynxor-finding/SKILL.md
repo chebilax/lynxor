@@ -1,20 +1,20 @@
 ---
-name: reposcan-finding
+name: lynxor-finding
 description: >
   Defines the Finding struct, severity scoring rules, and quality bar for
-  RepoScan security findings. Use when creating or modifying an analyzer,
+  Lynxor security findings. Use when creating or modifying an analyzer,
   writing a new detection rule, adding a Finding, working on the scoring
   engine, or reviewing output from secrets/docker/ci/dependencies/git-history
   analyzers.
 ---
 
-# RepoScan — Finding format & scoring rules
+# Lynxor — Finding format & scoring rules
 
 Ce fichier fait autorité sur la forme de chaque `Finding` produit par un analyzer, et sur la façon dont il pèse dans le score global. Toute nouvelle règle de détection (secrets, docker, CI, dependencies, git-history, code-smells) doit produire des `Finding` conformes à ce contrat, sans exception.
 
 ## Principe non négociable
 
-Un `Finding` sans message explicatif clair et sans piste de correction n'est pas un `Finding` valide — c'est du bruit, et RepoScan existe précisément pour l'éviter (voir vision.md, principe "Signal > bruit" et "Explicable").
+Un `Finding` sans message explicatif clair et sans piste de correction n'est pas un `Finding` valide — c'est du bruit, et Lynxor existe précisément pour l'éviter (voir vision.md, principe "Signal > bruit" et "Explicable").
 
 ## Struct Go
 

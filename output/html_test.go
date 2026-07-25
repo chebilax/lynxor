@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/xchebila/reposcan/core"
+	"github.com/xchebila/lynxor/core"
 )
 
 // timestampPattern matches WriteHTMLReport's "GeneratedAt" stamp
