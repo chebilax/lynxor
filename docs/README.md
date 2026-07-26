@@ -23,3 +23,8 @@ Ce qui suit documente le *pourquoi* derrière chaque décision d'architecture, a
 ## Décisions d'architecture (ADR)
 
 Chaque décision non triviale du projet est documentée au moment où elle est prise, pas reconstruite après coup. Voir [`decisions/`](decisions/) pour la liste complète, dans l'ordre chronologique.
+
+## Contribuer
+
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — le process réel (branche par feature, ADR, validation empirique, `make check`)
+- [`../CHANGELOG.md`](../CHANGELOG.md) — historique des versions
