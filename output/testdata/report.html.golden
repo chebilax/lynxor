@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Lynxor report — /repo</title>
+<title>Lynxor report - /repo</title>
 <style>
   :root {
     color-scheme: light;
@@ -96,7 +96,7 @@
 <div class="wrap">
   <header>
     <h1>Lynxor report</h1>
-    <div class="meta">/repo — generated 2000-01-01 00:00</div>
+    <div class="meta">/repo - generated 2000-01-01 00:00</div>
   </header>
 
   <div class="card hero">
@@ -180,7 +180,7 @@
         </div>
         <div class="finding-message">Infinite loop on invalid input.</div>
         <div class="finding-fix"><strong>Fix:</strong> Upgrade example.com/pkg past the vulnerable range.</div>
-        <div class="finding-context">no severity information available from OSV.dev for this vulnerability — defaulted to Medium</div>
+        <div class="finding-context">no severity information available from OSV.dev for this vulnerability - defaulted to Medium</div>
       </div>
       
     

@@ -6,7 +6,7 @@ import "sort"
 // vision.md's scoring principle. Repeated findings of the same severity are
 // weighted with diminishing returns (each extra one counts half as much as
 // the last) so that, say, five LOW findings can never outweigh one
-// CRITICAL — additive-to-parity scoring is explicitly rejected by design.
+// CRITICAL - additive-to-parity scoring is explicitly rejected by design.
 var severityImpact = map[Severity]float64{
 	Critical: 60,
 	High:     25,
@@ -24,7 +24,7 @@ type Score struct {
 
 // ComputeCategoryScore applies severity impacts with diminishing weight per
 // repeat, starting from a perfect 100 and clamping at 0. A single Critical
-// finding alone already drops the score to 40 — inside the "incident, not
+// finding alone already drops the score to 40 - inside the "incident, not
 // a deduction" zone described in vision.md.
 func ComputeCategoryScore(findings []Finding) Score {
 	counts := map[Severity]int{}
@@ -50,7 +50,7 @@ func ComputeCategoryScore(findings []Finding) Score {
 }
 
 // ComputeCategoryBreakdown returns one Score per distinct Category present
-// in findings — the per-category view vision.md's Phase 5 reporting spec
+// in findings - the per-category view vision.md's Phase 5 reporting spec
 // shows (Secrets/Docker/CI-CD/... each scored, then a separate total).
 // Each finding belongs to exactly one bucket, matching its own Category
 // field exactly: partitioned first, then ComputeCategoryScore is applied
@@ -60,7 +60,7 @@ func ComputeCategoryScore(findings []Finding) Score {
 //
 // The total score (ComputeCategoryScore called separately on the full,
 // unpartitioned findings list) is NOT derived from these per-category
-// values — it is not their sum or average. Doing that would let a
+// values - it is not their sum or average. Doing that would let a
 // CRITICAL in one category get diluted by clean categories elsewhere,
 // exactly what vision.md's scoring principle forbids: a critical must
 // dominate the total regardless of which category it came from.

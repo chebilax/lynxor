@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// MaxFileSize skips large files (binaries, lockfiles, vendored bundles) —
+// MaxFileSize skips large files (binaries, lockfiles, vendored bundles) -
 // they are never where a hand-typed secret lives, and reading them is the
 // single biggest threat to the "scan in < 5s" MVP exit criterion. Exported
 // so other repo-level scanners (e.g. git-history) apply the same guard.
@@ -26,7 +26,7 @@ var alwaysSkipDirs = map[string]bool{
 // IsVendoredPath reports whether any path segment names a directory this
 // project treats as third-party, not developer-authored: vendor/,
 // node_modules/. Exported so git-history scanning applies the same
-// exclusion the working-tree Scanner already does via alwaysSkipDirs —
+// exclusion the working-tree Scanner already does via alwaysSkipDirs -
 // without it, a single "vendor bump" commit touching thousands of
 // third-party files both tanks scan speed and surfaces the third party's
 // own test/placeholder credentials (e.g. Google's and AWS's publicly
@@ -118,7 +118,7 @@ func (s *Scanner) Scan() ([]Finding, error) {
 }
 
 // IsBinary uses the same heuristic as git: a NUL byte in the first chunk
-// means "not text". Cheap and good enough — Lynxor doesn't need to be
+// means "not text". Cheap and good enough - Lynxor doesn't need to be
 // exact here, just fast and non-noisy on binary assets.
 func IsBinary(content []byte) bool {
 	n := len(content)
@@ -131,7 +131,7 @@ func IsBinary(content []byte) bool {
 // gitignore is a deliberately minimal matcher: exact path/dir names and
 // simple glob patterns via filepath.Match. It does not implement the full
 // gitignore spec (no negation, no ** double-star, no anchoring nuances).
-// That's a conscious MVP trade-off — respecting the common case keeps
+// That's a conscious MVP trade-off - respecting the common case keeps
 // noise down without adding a parsing dependency (vision.md: stdlib first).
 type gitignore struct {
 	patterns []string
@@ -150,11 +150,11 @@ func loadGitignore(root string) *gitignore {
 			continue
 		}
 		if strings.HasPrefix(line, "!") {
-			g.warnings = append(g.warnings, fmt.Sprintf("negation pattern %q is not supported and was ignored — the file(s) it re-includes may be skipped by the broader pattern above it", line))
+			g.warnings = append(g.warnings, fmt.Sprintf("negation pattern %q is not supported and was ignored - the file(s) it re-includes may be skipped by the broader pattern above it", line))
 			continue
 		}
 		if strings.Contains(line, "**") {
-			g.warnings = append(g.warnings, fmt.Sprintf("double-star pattern %q is not supported and was ignored — matching falls back to the surrounding rules only", line))
+			g.warnings = append(g.warnings, fmt.Sprintf("double-star pattern %q is not supported and was ignored - matching falls back to the surrounding rules only", line))
 			continue
 		}
 		g.patterns = append(g.patterns, strings.Trim(line, "/"))

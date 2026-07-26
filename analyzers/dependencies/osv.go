@@ -34,7 +34,7 @@ const (
 	detailConcurrency = 8
 
 	// OSV.dev's querybatch endpoint rejects more than this many queries in
-	// one request with {"code":3,"message":"too many queries"} — this
+	// one request with {"code":3,"message":"too many queries"} - this
 	// isn't documented anywhere; found by bisecting against the live API
 	// after a 1075-dependency repo (prometheus, 5 go.sum files) silently
 	// got zero results from a request that turned out to 400. Chunking
@@ -43,7 +43,7 @@ const (
 )
 
 // Result carries findings plus a non-fatal Warning: a network failure
-// degrades to "checked nothing, said why" rather than failing the scan —
+// degrades to "checked nothing, said why" rather than failing the scan -
 // see docs/decisions/0004-dependency-scanner-network.md.
 type Result struct {
 	Findings []core.Finding
@@ -90,7 +90,7 @@ func CheckVulnerabilities(deps []Dependency) Result {
 // down to one representative ID. OSV mirrors the same real vulnerability
 // under multiple ID schemes (GHSA, PYSEC, CVE, the ecosystem-native GO-*
 // IDs) and a single package+version can match more than one of them at
-// once — confirmed against the real API: GHSA-2xpw-w6gg-jr37 and
+// once - confirmed against the real API: GHSA-2xpw-w6gg-jr37 and
 // PYSEC-2026-1994 are the same urllib3 vulnerability, word-for-word same
 // summary, linked via GHSA-2xpw-w6gg-jr37's own "aliases" field. Without
 // this, the same real issue would be reported (and scored) twice.
@@ -194,7 +194,7 @@ type osvBatchResponse struct {
 // queryBatch returns, for each dependency (by index, matching deps), the
 // IDs of vulnerabilities OSV knows about for that exact package+version.
 // This endpoint deliberately returns only ID + modified timestamp per
-// vuln — full details need a separate GET per ID, done in
+// vuln - full details need a separate GET per ID, done in
 // fetchDetailsConcurrently. Requests over maxBatchSize queries are split
 // into sequential chunks; a single 400 from any chunk fails the whole
 // check (partial dependency coverage would be more misleading than an
@@ -228,7 +228,7 @@ func queryBatchChunk(client *http.Client, deps []Dependency) ([][]string, error)
 
 	resp, err := client.Post(osvBatchURL, "application/json", bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("could not reach OSV.dev (%w) — check network access or a proxy blocking outbound HTTPS", err)
+		return nil, fmt.Errorf("could not reach OSV.dev (%w) - check network access or a proxy blocking outbound HTTPS", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -326,7 +326,7 @@ func buildFinding(dep Dependency, id string, detail *osvVulnDetail) core.Finding
 			Fix:      fmt.Sprintf("See https://osv.dev/vulnerability/%s for the affected version range and fixed release, then upgrade %s.", id, dep.Name),
 			File:     dep.Manifest,
 			Category: "dependencies",
-			Context:  "advisory details could not be fetched — severity defaulted to Medium, not derived from any OSV data",
+			Context:  "advisory details could not be fetched - severity defaulted to Medium, not derived from any OSV data",
 		}
 	}
 
@@ -344,7 +344,7 @@ func buildFinding(dep Dependency, id string, detail *osvVulnDetail) core.Finding
 		Severity: severity,
 		Title:    fmt.Sprintf("%s: known vulnerability in %s@%s", id, dep.Name, dep.Version),
 		Message:  message,
-		Fix:      fmt.Sprintf("Upgrade %s past the vulnerable range — see https://osv.dev/vulnerability/%s for the fixed version.", dep.Name, id),
+		Fix:      fmt.Sprintf("Upgrade %s past the vulnerable range - see https://osv.dev/vulnerability/%s for the fixed version.", dep.Name, id),
 		File:     dep.Manifest,
 		Category: "dependencies",
 		Context:  context,
@@ -353,7 +353,7 @@ func buildFinding(dep Dependency, id string, detail *osvVulnDetail) core.Finding
 
 // mapSeverity buckets an OSV record into Lynxor's four-level Severity.
 // database_specific.severity (a simple CRITICAL/HIGH/MODERATE/LOW string,
-// common on GHSA-sourced records) is authoritative when present — no
+// common on GHSA-sourced records) is authoritative when present - no
 // Context needed. Otherwise, a CVSS vector is used to *estimate* severity
 // via a coarse heuristic, not a real CVSS score computation (out of scope:
 // implementing the full FIRST formula for three CVSS versions is more
@@ -384,7 +384,7 @@ func mapSeverity(detail *osvVulnDetail) (core.Severity, string) {
 		}
 	}
 
-	return core.Medium, "no severity information available from OSV.dev for this vulnerability — defaulted to Medium"
+	return core.Medium, "no severity information available from OSV.dev for this vulnerability - defaulted to Medium"
 }
 
 // estimateSeverityFromCVSS is a deliberately coarse heuristic over a CVSS

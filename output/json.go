@@ -8,7 +8,7 @@ import (
 )
 
 // schemaVersion versions the JSON output independently of core.Finding's
-// Go shape — the same reasoning as the plugin protocol's protocol_version
+// Go shape - the same reasoning as the plugin protocol's protocol_version
 // (docs/decisions/0008-plugin-system-scope.md): a machine consumer parsing
 // --format json shouldn't break because an internal Go field got renamed
 // for readability. Bump this, not silently change field names, if the
@@ -41,7 +41,7 @@ type jsonReport struct {
 
 // WriteJSONReport serializes findings and score for a machine consumer
 // (a CI script parsing results, another tool). Every Finding field is
-// always present, even when empty (e.g. Context, CommitHash) — omitting
+// always present, even when empty (e.g. Context, CommitHash) - omitting
 // unset fields (encoding/json's omitempty) would make a consumer unable
 // to tell "not applicable" apart from "the field was dropped this time".
 func WriteJSONReport(w io.Writer, findings []core.Finding, score core.Score) error {

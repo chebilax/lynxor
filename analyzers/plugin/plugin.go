@@ -1,7 +1,7 @@
 // Package plugin implements Lynxor's external plugin protocol (Phase 4):
 // a subprocess speaking NDJSON on stdin/stdout, never a same-process Go
 // plugin. See docs/plugin-protocol.md for the full contract this code
-// implements — that document, not this one, is the source of truth for
+// implements - that document, not this one, is the source of truth for
 // plugin authors.
 package plugin
 
@@ -24,7 +24,7 @@ import (
 const (
 	protocolVersion = "1.0"
 
-	// A per-file limit, not a whole-scan budget like githistory's — one
+	// A per-file limit, not a whole-scan budget like githistory's - one
 	// slow file just means this plugin stops being consulted for the rest
 	// of the scan (see abandon), not that the scan waits longer overall.
 	requestTimeout = 5 * time.Second
@@ -38,7 +38,7 @@ const (
 var errTimeout = errors.New("plugin did not respond in time")
 
 // Plugin wraps one subprocess and implements core.Analyzer, so it plugs
-// into core.Scanner exactly like secrets/docker/cicd do — the scan loop
+// into core.Scanner exactly like secrets/docker/cicd do - the scan loop
 // doesn't need to know an analyzer is backed by a pipe instead of Go code.
 type Plugin struct {
 	name string
@@ -117,7 +117,7 @@ func (p *Plugin) Configure(args map[string]string) error {
 
 	req := map[string]any{"type": "configure", "args": args}
 	if err := p.writeLine(req); err != nil {
-		p.abandon(fmt.Sprintf("plugin %q: failed to send configure message (%v) — skipping it for this scan", p.name, err))
+		p.abandon(fmt.Sprintf("plugin %q: failed to send configure message (%v) - skipping it for this scan", p.name, err))
 		return err
 	}
 	return nil
@@ -158,8 +158,8 @@ func (p *Plugin) handshake() error {
 }
 
 // Run sends one file over the pipe and waits for exactly one result,
-// per docs/plugin-protocol.md. Any failure — a malformed response, a
-// timeout, or the process dying mid-request — abandons the plugin for the
+// per docs/plugin-protocol.md. Any failure - a malformed response, a
+// timeout, or the process dying mid-request - abandons the plugin for the
 // rest of the scan rather than retrying: see abandon.
 func (p *Plugin) Run(file core.FileContext) []core.Finding {
 	p.mu.Lock()
@@ -175,30 +175,30 @@ func (p *Plugin) Run(file core.FileContext) []core.Finding {
 		"content": base64.StdEncoding.EncodeToString(file.Content),
 	}
 	if err := p.writeLine(req); err != nil {
-		p.abandon(fmt.Sprintf("plugin %q: failed to send %s (%v) — skipping it for the rest of the scan", p.name, file.Path, err))
+		p.abandon(fmt.Sprintf("plugin %q: failed to send %s (%v) - skipping it for the rest of the scan", p.name, file.Path, err))
 		return nil
 	}
 
 	line, err := p.readLine(requestTimeout)
 	if err != nil {
 		if errors.Is(err, errTimeout) {
-			p.abandon(fmt.Sprintf("plugin %q did not respond within %s on %s — skipping it for the rest of the scan", p.name, requestTimeout, file.Path))
+			p.abandon(fmt.Sprintf("plugin %q did not respond within %s on %s - skipping it for the rest of the scan", p.name, requestTimeout, file.Path))
 		} else {
-			p.abandon(fmt.Sprintf("plugin %q crashed or closed its connection while processing %s (%v) — skipping it for the rest of the scan", p.name, file.Path, err))
+			p.abandon(fmt.Sprintf("plugin %q crashed or closed its connection while processing %s (%v) - skipping it for the rest of the scan", p.name, file.Path, err))
 		}
 		return nil
 	}
 
 	var msg incomingMsg
 	if err := json.Unmarshal(line, &msg); err != nil {
-		p.abandon(fmt.Sprintf("plugin %q sent invalid JSON while processing %s — skipping it for the rest of the scan", p.name, file.Path))
+		p.abandon(fmt.Sprintf("plugin %q sent invalid JSON while processing %s - skipping it for the rest of the scan", p.name, file.Path))
 		return nil
 	}
 
 	switch msg.Type {
 	case "result":
 		if msg.Path != file.Path {
-			p.abandon(fmt.Sprintf("plugin %q returned a result for %q instead of the requested %q — skipping it for the rest of the scan", p.name, msg.Path, file.Path))
+			p.abandon(fmt.Sprintf("plugin %q returned a result for %q instead of the requested %q - skipping it for the rest of the scan", p.name, msg.Path, file.Path))
 			return nil
 		}
 		return p.convertFindings(msg.Findings, file.Path)
@@ -210,7 +210,7 @@ func (p *Plugin) Run(file core.FileContext) []core.Finding {
 		}
 		return nil
 	default:
-		p.abandon(fmt.Sprintf("plugin %q sent an unexpected message type %q — skipping it for the rest of the scan", p.name, msg.Type))
+		p.abandon(fmt.Sprintf("plugin %q sent an unexpected message type %q - skipping it for the rest of the scan", p.name, msg.Type))
 		return nil
 	}
 }
@@ -219,7 +219,7 @@ func (p *Plugin) Run(file core.FileContext) []core.Finding {
 // fatal error, a timeout, or the process dying outright all end up here.
 // A dead process makes the next readLine fail (EOF or a read error) via
 // the exact same path a timeout takes, so there's no separate "the
-// process crashed" branch to maintain — it falls out of treating stdout
+// process crashed" branch to maintain - it falls out of treating stdout
 // closing unexpectedly as just another read failure.
 func (p *Plugin) abandon(reason string) {
 	p.mu.Lock()
@@ -250,7 +250,7 @@ func (p *Plugin) writeLine(v any) error {
 // standard goroutine+select timeout idiom instead. If the timeout fires,
 // the scan goroutine is still blocked on the underlying read; it unblocks
 // (and its buffered, now-unread send becomes a no-op) once abandon kills
-// the process — no permanent goroutine leak as long as every timeout path
+// the process - no permanent goroutine leak as long as every timeout path
 // leads to abandon, which Run and handshake both guarantee.
 func (p *Plugin) readLine(timeout time.Duration) ([]byte, error) {
 	type result struct {
@@ -309,7 +309,7 @@ var validSeverity = map[string]core.Severity{
 }
 
 // convertFindings applies the same non-negotiable quality bar the
-// lynxor-finding skill imposes on every built-in rule — a finding with
+// lynxor-finding skill imposes on every built-in rule - a finding with
 // no message/fix, or a severity string that isn't one of the four exact
 // values, is dropped and logged, not silently accepted or guessed at.
 func (p *Plugin) convertFindings(wire []wireFinding, path string) []core.Finding {

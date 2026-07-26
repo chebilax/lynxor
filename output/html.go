@@ -12,7 +12,7 @@ import (
 // CSS/font/JS, works offline, matches the rest of this project's "no
 // network unless explicitly opted in" discipline. The total score is
 // computed independently over every finding (core.ComputeCategoryScore on
-// the full list) — never derived from the per-category breakdown, which
+// the full list) - never derived from the per-category breakdown, which
 // would let a CRITICAL in one category get diluted by clean categories
 // elsewhere. See core/scoring_test.go and
 // docs/decisions/0010-html-dashboard.md.
@@ -42,7 +42,7 @@ type htmlData struct {
 }
 
 // shortHash mirrors the CLI report's own truncation (output/cli.go),
-// guarded against a hash shorter than 7 characters — every real caller
+// guarded against a hash shorter than 7 characters - every real caller
 // sets a full commit SHA, but a template panic on a malformed value would
 // be a rough failure mode for what's otherwise a purely display concern.
 func shortHash(h string) string {
@@ -53,7 +53,7 @@ func shortHash(h string) string {
 }
 
 // statusOf maps a letter grade to one of the dataviz skill's fixed status
-// roles (good/warning/serious/critical) — never a generated or
+// roles (good/warning/serious/critical) - never a generated or
 // interpolated color, always one of the four reserved steps.
 func statusOf(s core.Score) string {
 	switch s.Grade {
@@ -81,7 +81,7 @@ func severityStatus(sev core.Severity) string {
 	}
 }
 
-// severityIcon mirrors the CLI report's own icon() (output/cli.go) —
+// severityIcon mirrors the CLI report's own icon() (output/cli.go) -
 // same two icons for the same severities, so a reader moving between
 // --format cli and --format html sees a consistent visual language. Also
 // satisfies the dataviz skill's "status color never carries meaning
@@ -100,7 +100,7 @@ const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Lynxor report — {{.Path}}</title>
+<title>Lynxor report - {{.Path}}</title>
 <style>
   :root {
     color-scheme: light;
@@ -194,7 +194,7 @@ const htmlTemplate = `<!DOCTYPE html>
 <div class="wrap">
   <header>
     <h1>Lynxor report</h1>
-    <div class="meta">{{.Path}} — generated {{.GeneratedAt}}</div>
+    <div class="meta">{{.Path}} - generated {{.GeneratedAt}}</div>
   </header>
 
   <div class="card hero">

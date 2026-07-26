@@ -1,7 +1,7 @@
 package core
 
 // Severity reflects real-world impact, not code-quality style. Critical means
-// an active leak or immediate account access — see vision.md scoring principle.
+// an active leak or immediate account access - see vision.md scoring principle.
 type Severity string
 
 const (
@@ -24,7 +24,7 @@ type Finding struct {
 	CommitHash string
 	Category   string
 	// Context is an optional, non-authoritative hint for triage (e.g. "path
-	// looks like a test/fixture directory"). It never changes Severity —
+	// looks like a test/fixture directory"). It never changes Severity -
 	// see docs/decisions/0001-test-fixture-context.md for why Lynxor
 	// refuses to auto-downgrade severity based on a path pattern.
 	Context string

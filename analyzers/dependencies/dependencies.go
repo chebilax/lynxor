@@ -1,6 +1,6 @@
 // Package dependencies checks a repo's Go and Python manifests for known
 // vulnerabilities via OSV.dev. Unlike every other analyzer, this one needs
-// the network — see docs/decisions/0004-dependency-scanner-network.md for
+// the network - see docs/decisions/0004-dependency-scanner-network.md for
 // why that makes it opt-in (--deps) rather than on by default.
 //
 // Discovery (finding and parsing manifests) is local and always safe to
@@ -53,7 +53,7 @@ func init() {
 // Discover walks repoRoot for known manifest/lockfile formats (see parsers)
 // and parses out exact-pinned dependencies. Unpinned requirements (e.g. a
 // Python "package>=1.0" with no exact version) are skipped rather than
-// queried without a version — OSV would return every vulnerability ever
+// queried without a version - OSV would return every vulnerability ever
 // reported for that package regardless of whether the installed version is
 // actually affected, which is exactly the kind of noisy, ambiguous result
 // vision.md's Non-Goals rule out.
@@ -115,7 +115,7 @@ func parseGoSum(path, manifestRel string) []Dependency {
 	//
 	// Treating every distinct version mentioned anywhere in go.sum as an
 	// in-use dependency (the previous version of this function) reports
-	// versions that were never actually built: real repo, real finding —
+	// versions that were never actually built: real repo, real finding -
 	// golang.org/x/text@v0.3.6 and gopkg.in/yaml.v2@v2.2.2 kept showing up
 	// as vulnerable in this project's own --deps scan after bumping to
 	// x/text@v0.40.0, because their go.mod-only lines never disappear. One
@@ -148,7 +148,7 @@ func (requirementsTxtParser) Parse(path, manifestRel string) []Dependency {
 
 // requirementLine matches "package==1.2.3" and "package[extra]==1.2.3",
 // ignoring the extra. Anything else (unpinned ">=", a git/URL install, a
-// -r include) is deliberately not matched — see Discover's doc comment.
+// -r include) is deliberately not matched - see Discover's doc comment.
 var requirementLine = regexp.MustCompile(`^([A-Za-z0-9][A-Za-z0-9_.\-]*)\s*(\[[^\]]*\])?\s*==\s*([A-Za-z0-9_.\-]+)`)
 
 func parseRequirementsTxt(path, manifestRel string) []Dependency {

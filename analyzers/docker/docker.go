@@ -1,6 +1,6 @@
 // Package docker implements Lynxor's Phase 2 Dockerfile detection rules:
 // running as root, floating tags, and ADD used where COPY would do.
-// Secrets hardcoded in ENV/ARG instructions need no rule here — a
+// Secrets hardcoded in ENV/ARG instructions need no rule here - a
 // Dockerfile is just text, so analyzers/secrets already scans it via the
 // same core.Scanner pass, tagged Category "secrets".
 package docker
@@ -40,7 +40,7 @@ func isDockerfile(path string) bool {
 
 var fromPattern = regexp.MustCompile(`(?i)^\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+[Aa][Ss]\s+(\S+))?\s*$`)
 
-// checkTags flags images pulled without a pinned tag or digest — "latest"
+// checkTags flags images pulled without a pinned tag or digest - "latest"
 // (implicit or explicit) means the same Dockerfile can build a different
 // image tomorrow, with no record of what changed.
 //
@@ -92,8 +92,8 @@ var archiveExt = regexp.MustCompile(`(?i)\.(tar(\.(gz|bz2|xz))?|tgz|zip)$`)
 
 // checkAdd flags ADD used for plain local files/directories, where COPY is
 // the more predictable, more transparent choice (Docker's own recommended
-// practice). ADD's two genuinely unique features — fetching a URL, and
-// auto-extracting a recognized archive — are exactly what's excluded here,
+// practice). ADD's two genuinely unique features - fetching a URL, and
+// auto-extracting a recognized archive - are exactly what's excluded here,
 // since those aren't replaceable by COPY at all.
 //
 // False positive this rule must not trip on: `ADD app.tar.gz /app` for its
@@ -121,7 +121,7 @@ func checkAdd(path string, lines []string) []core.Finding {
 var userPattern = regexp.MustCompile(`(?i)^\s*USER\s+(\S+)`)
 
 // checkUser looks only at the last build stage, since only the final
-// stage's USER instruction affects the resulting image — an earlier stage
+// stage's USER instruction affects the resulting image - an earlier stage
 // running as root to install packages, then switching to a non-root USER
 // before the final stage, is a normal and safe pattern that must not be
 // flagged.
@@ -130,13 +130,13 @@ var userPattern = regexp.MustCompile(`(?i)^\s*USER\s+(\S+)`)
 // sets a non-root USER internally (e.g. official node images end in `USER
 // node`). A Dockerfile that adds nothing further inherits that non-root
 // user at runtime but looks, from this file alone, identical to one that
-// inherits root — inspecting the base image's own effective USER is out of
+// inherits root - inspecting the base image's own effective USER is out of
 // scope (no image pulling, no deep static analysis, per vision.md).
 //
 // One specific case of that is worth a real exception, not just a
 // disclosed limitation: distroless images (gcr.io/distroless/*) put
 // "nonroot" directly in the tag as a documented convention (e.g.
-// static-debian12:nonroot-amd64) — confirmed against prometheus's own
+// static-debian12:nonroot-amd64) - confirmed against prometheus's own
 // Dockerfile.distroless, which relies on exactly this with a comment
 // saying so and no USER instruction of its own.
 func checkUser(path string, lines []string) []core.Finding {

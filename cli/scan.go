@@ -33,7 +33,7 @@ func newScanCmd() *cobra.Command {
 By default, git history scanning is bounded by a short time budget so the
 scan stays fast. --full-history removes that bound and can take several
 minutes on repos with a large history (observed: ~18 minutes on a repo with
-~18k commits) — if you use it in CI, set a generous timeout, or it will
+~18k commits) - if you use it in CI, set a generous timeout, or it will
 look like a hung job.
 
 Dependency vulnerability checking (go.sum, requirements.txt via OSV.dev)
@@ -42,7 +42,7 @@ that needs the network. --deps enables it explicitly.
 
 --plugin runs an external plugin executable alongside the built-in rules
 (see docs/plugin-protocol.md). A plugin that crashes, times out, or
-misbehaves is dropped for the rest of the scan with a warning — it never
+misbehaves is dropped for the rest of the scan with a warning - it never
 fails the whole scan. --plugin-arg passes it configuration, addressed by
 the plugin's own self-declared name from its handshake, e.g.
 --plugin-arg my-plugin:api-key=xyz.`,
@@ -81,12 +81,12 @@ the plugin's own self-declared name from its handshake, e.g.
 			for _, p := range pluginPaths {
 				loaded, err := plugin.Load(p)
 				if err != nil {
-					fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  %v — skipping this plugin\n", err)
+					fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  %v - skipping this plugin\n", err)
 					continue
 				}
 				if args, ok := argsByPlugin[loaded.Name()]; ok {
 					if err := loaded.Configure(args); err != nil {
-						fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  plugin %q: %v — skipping this plugin\n", loaded.Name(), err)
+						fmt.Fprintf(cmd.ErrOrStderr(), "⚠️  plugin %q: %v - skipping this plugin\n", loaded.Name(), err)
 						loaded.Close()
 						continue
 					}
@@ -101,7 +101,7 @@ the plugin's own self-declared name from its handshake, e.g.
 			}
 			// Covers every normal return path (including the error
 			// returns below). os.Exit further down skips deferred calls
-			// entirely, so that path calls closePlugins explicitly too —
+			// entirely, so that path calls closePlugins explicitly too -
 			// closing lets a well-behaved plugin see stdin close and exit
 			// cleanly, instead of relying on process teardown to do it.
 			defer closePlugins()
@@ -120,7 +120,7 @@ the plugin's own self-declared name from its handshake, e.g.
 			deps := dependencies.Discover(path)
 			switch {
 			case len(deps) == 0:
-				// Nothing to check either way — stay silent, not every
+				// Nothing to check either way - stay silent, not every
 				// repo has a Go or Python manifest.
 			case checkDeps:
 				result := dependencies.CheckVulnerabilities(deps)
@@ -133,7 +133,7 @@ the plugin's own self-declared name from its handshake, e.g.
 				if len(deps) == 1 {
 					noun = "dependency"
 				}
-				fmt.Fprintf(cmd.ErrOrStderr(), "ℹ️  Found %d %s — run with --deps to check them against known vulnerabilities (requires network).\n", len(deps), noun)
+				fmt.Fprintf(cmd.ErrOrStderr(), "ℹ️  Found %d %s - run with --deps to check them against known vulnerabilities (requires network).\n", len(deps), noun)
 			}
 
 			if !noHistory {
@@ -185,11 +185,11 @@ the plugin's own self-declared name from its handshake, e.g.
 		},
 	}
 
-	cmd.Flags().BoolVar(&fullHistory, "full-history", false, "scan entire reachable history + dangling commits, no time budget — can take several minutes on large repos, avoid in CI without a generous timeout")
+	cmd.Flags().BoolVar(&fullHistory, "full-history", false, "scan entire reachable history + dangling commits, no time budget - can take several minutes on large repos, avoid in CI without a generous timeout")
 	cmd.Flags().BoolVar(&noHistory, "no-history", false, "skip git history scanning, working tree only")
-	cmd.Flags().BoolVar(&checkDeps, "deps", false, "check go.sum/requirements.txt dependencies against known vulnerabilities via OSV.dev — requires network, off by default")
-	cmd.Flags().StringArrayVar(&pluginPaths, "plugin", nil, "path to an external plugin executable (see docs/plugin-protocol.md) — repeatable")
-	cmd.Flags().StringArrayVar(&pluginArgs, "plugin-arg", nil, `configuration for a loaded plugin, format "<plugin_name>:<key>=<value>" — repeatable, matched against the plugin's own self-declared name from its handshake (see docs/plugin-protocol.md)`)
+	cmd.Flags().BoolVar(&checkDeps, "deps", false, "check go.sum/requirements.txt dependencies against known vulnerabilities via OSV.dev - requires network, off by default")
+	cmd.Flags().StringArrayVar(&pluginPaths, "plugin", nil, "path to an external plugin executable (see docs/plugin-protocol.md) - repeatable")
+	cmd.Flags().StringArrayVar(&pluginArgs, "plugin-arg", nil, `configuration for a loaded plugin, format "<plugin_name>:<key>=<value>" - repeatable, matched against the plugin's own self-declared name from its handshake (see docs/plugin-protocol.md)`)
 	cmd.Flags().StringVar(&format, "format", "cli", `output format: "cli" (default, colored terminal), "json" (machine-readable, docs/decisions/0009-json-output-schema.md), or "html" (self-contained dashboard, docs/decisions/0010-html-dashboard.md)`)
 
 	return cmd

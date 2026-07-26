@@ -4,7 +4,7 @@
 // recurring PR check, not just a one-off scan (vision.md, Phase 3).
 //
 // It reuses the existing per-file analyzers (secrets, docker, cicd)
-// unchanged — the only new logic here is reading a ref's tree without
+// unchanged - the only new logic here is reading a ref's tree without
 // touching the working directory, and diffing two Finding sets. The
 // Dependency Scanner's network calls are deliberately not part of this by
 // default, for the same reason they're opt-in in `scan` (ADR 0004).
@@ -29,7 +29,7 @@ var ErrNotAGitRepo = errors.New("not a git repository")
 
 // Status marks whether a Finding was introduced or resolved between the
 // two refs compared. Findings present on both sides aren't reported at
-// all — Security Diff Mode shows the delta, not the whole repo's state.
+// all - Security Diff Mode shows the delta, not the whole repo's state.
 type Status string
 
 const (
@@ -85,7 +85,7 @@ func resolveTree(repo *git.Repository, ref string) (*object.Tree, error) {
 }
 
 // scanTree runs every working-tree analyzer against a ref's tree exactly
-// as core.Scanner runs them against the actual working tree — same
+// as core.Scanner runs them against the actual working tree - same
 // per-file guards (size, binary, vendored paths), same analyzers, just
 // reading blobs from git instead of the filesystem so no checkout is
 // needed.
@@ -123,7 +123,7 @@ func scanTree(tree *object.Tree) ([]core.Finding, error) {
 // would misreport a still-present secret as both FIXED (old line) and NEW
 // (new line) for no real reason. Known trade-off: a renamed-but-unmodified
 // file reports as FIXED (old path) + NEW (new path) rather than
-// unchanged — no rename detection, consistent with vision.md's Non-Goals
+// unchanged - no rename detection, consistent with vision.md's Non-Goals
 // (no deep static analysis).
 type findingKey struct {
 	File     string
@@ -136,7 +136,7 @@ func keyOf(f core.Finding) findingKey {
 }
 
 // diffFindings pairs findings by key and reports only the surplus on
-// either side — if refA has two matches for the same key and refB has
+// either side - if refA has two matches for the same key and refB has
 // one, exactly one is reported FIXED (the pair that still exists on both
 // sides is not "the same finding twice", it's genuinely one instance
 // resolved).

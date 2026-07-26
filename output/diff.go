@@ -7,7 +7,7 @@ import (
 	"github.com/chebilax/lynxor/analyzers/diffmode"
 )
 
-// WriteDiffReport prints only what changed between two refs — vision.md's
+// WriteDiffReport prints only what changed between two refs - vision.md's
 // Security Diff Mode format (❌ NEW / ✔️ FIXED), not a full score. A repo
 // scan has one number to summarize; a PR diff doesn't need one; what
 // matters is whether anything NEW showed up at all.

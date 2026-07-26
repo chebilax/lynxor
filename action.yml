@@ -19,7 +19,7 @@ inputs:
       Pass --deps to `lynxor scan` on non-PR runs, checking pinned
       dependencies against OSV.dev (requires network). Ignored on
       pull_request runs, which always use `lynxor diff` (no --deps
-      equivalent — see README).
+      equivalent - see README).
     required: false
     default: 'false'
   go-version:

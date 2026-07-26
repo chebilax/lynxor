@@ -1,5 +1,5 @@
 // Package secrets implements Lynxor's Phase 1 detection rules: hardcoded
-// credentials in the working tree (not git history — that's Phase 2).
+// credentials in the working tree (not git history - that's Phase 2).
 package secrets
 
 import (
@@ -21,14 +21,14 @@ type rule struct {
 	// prefilter lists literal substrings, checked with bytes.Contains before
 	// running pattern; the rule only proceeds to the regex if at least one
 	// is present. Purely a speed optimization (skips the regex engine on
-	// the vast majority of files that can't possibly match) — it never
+	// the vast majority of files that can't possibly match) - it never
 	// changes which files match, since pattern always matches a
 	// superstring containing one of these literals.
 	prefilter [][]byte
 	// exclude, if set, is checked against each raw match; a true result
 	// drops that match without creating a Finding. Used for well-known,
 	// publicly documented placeholder values that would otherwise match
-	// the pattern exactly — not a general noise filter.
+	// the pattern exactly - not a general noise filter.
 	exclude func(match []byte) bool
 }
 
@@ -42,7 +42,7 @@ func anyContains(content []byte, substrs [][]byte) bool {
 }
 
 // Patterns are intentionally specific (prefix + length) rather than generic
-// "looks like base64" heuristics — generic patterns are exactly the kind of
+// "looks like base64" heuristics - generic patterns are exactly the kind of
 // noisy rule the vision.md "signal > bruit" principle rules out.
 var rules = []rule{
 	{
@@ -53,7 +53,7 @@ var rules = []rule{
 		fix:      "Revoke this key in the AWS IAM console, then load credentials from environment variables or a secrets manager (AWS Secrets Manager, Vault).",
 		// False positive, confirmed in the wild: AWS's own SDKs and docs
 		// use AKIAIOSFODNN7EXAMPLE as the canonical placeholder access key
-		// — found in vendor/github.com/aws/aws-sdk-go's own source comments
+		// - found in vendor/github.com/aws/aws-sdk-go's own source comments
 		// during git-history testing on prometheus. AWS's documented
 		// convention is that every example key they publish ends in
 		// "EXAMPLE", so that's the exclusion, not a one-off literal.
@@ -119,7 +119,7 @@ var rules = []rule{
 		message:  "A PEM-encoded private key was found in this file. Anyone with repo access can now impersonate the holder of this key (TLS, SSH, or signing).",
 		fix:      "Revoke/rotate the corresponding certificate or SSH key pair immediately, then remove the key from the repo and store it outside version control.",
 		// Requires a full BEGIN/END block with a plausibly long body, not
-		// just the header text — otherwise this matches documentation that
+		// just the header text - otherwise this matches documentation that
 		// shows the PEM header followed by a truncated/placeholder body
 		// (e.g. "MIIEowIBAAKCAQEA..." or "...xxxx") with no real key
 		// material, which is common in tutorials and API reference docs.
@@ -187,7 +187,7 @@ func (a *Analyzer) Run(file core.FileContext) []core.Finding {
 	// docs/decisions/0001-test-fixture-context.md).
 	if core.LooksLikeTestPath(file.Path) {
 		for i := range findings {
-			findings[i].Context = "path looks like a test/fixture directory — verify this isn't a real secret before treating it as routine"
+			findings[i].Context = "path looks like a test/fixture directory - verify this isn't a real secret before treating it as routine"
 		}
 	}
 

@@ -6,7 +6,7 @@ import "testing"
 // explicit test requested before merging the HTML dashboard's category
 // breakdown: every finding must land in exactly one category's Score,
 // never two, never zero. The oracle is ComputeCategoryScore itself,
-// already trusted — each category's breakdown value must equal what you
+// already trusted - each category's breakdown value must equal what you
 // get by manually filtering findings to that category and scoring them
 // directly. If partitioning ever double-counted or dropped a finding,
 // these two computations would diverge.
@@ -85,9 +85,9 @@ func TestComputeCategoryBreakdown_TotalIsNotAnAggregateOfCategoryScores(t *testi
 	naiveAverage := sum / len(breakdown)
 
 	if total.Value == naiveAverage {
-		t.Fatalf("total score (%d) equals the naive average of category scores (%d) — this fixture no longer distinguishes independent scoring from averaging; adjust severities so the two diverge", total.Value, naiveAverage)
+		t.Fatalf("total score (%d) equals the naive average of category scores (%d) - this fixture no longer distinguishes independent scoring from averaging; adjust severities so the two diverge", total.Value, naiveAverage)
 	}
 	if total.Value >= 50 {
-		t.Errorf("a single CRITICAL finding should dominate the total (expected well under 50), got %d — naive average of categories was %d", total.Value, naiveAverage)
+		t.Errorf("a single CRITICAL finding should dominate the total (expected well under 50), got %d - naive average of categories was %d", total.Value, naiveAverage)
 	}
 }

@@ -51,7 +51,7 @@
       "line": 0,
       "commit_hash": "",
       "category": "dependencies",
-      "context": "no severity information available from OSV.dev for this vulnerability — defaulted to Medium"
+      "context": "no severity information available from OSV.dev for this vulnerability - defaulted to Medium"
     }
   ]
 }

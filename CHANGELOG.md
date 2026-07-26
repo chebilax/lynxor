@@ -12,7 +12,7 @@ user-visible impact, not just code churn.
 
 ### Fixed
 - `githistory`: a secret introduced then later removed still reports two
-  findings (two real, independent diff events — not merged), but each now
+  findings (two real, independent diff events - not merged), but each now
   cross-references the other's commit via `Finding.Context` ("also
   removed in commit X" / "originally introduced in commit Y") instead of
   reading as unrelated noise. See [ADR 0023](docs/decisions/0023-githistory-context-crossref.md), issue #27.
@@ -36,13 +36,13 @@ user-visible impact, not just code churn.
   input was writing a stale, unresolved `_authToken` line into `.npmrc`,
   silently preventing the OIDC handshake from ever being attempted (`401`
   on `npm whoami`, `404` on `npm publish`). Fixed by not setting
-  `registry-url` at all — `registry.npmjs.org` is npm's own default.
+  `registry-url` at all - `registry.npmjs.org` is npm's own default.
 
 ## [1.1.1] - 2026-07-25
 
 ### Added
 - npm trusted publishing (OIDC) replaces the originally-planned
-  `NPM_TOKEN` secret for `npm publish` — no long-lived token stored or
+  `NPM_TOKEN` secret for `npm publish` - no long-lived token stored or
   rotated.
 
 ### Changed
@@ -81,7 +81,7 @@ user-visible impact, not just code churn.
 - `--deps`: `go.sum` lines that only pin a `go.mod` hash (not real module
   content actually fetched and compiled) were reported as vulnerable
   dependencies even when the real, selected version had already been
-  upgraded — a real false-positive found investigating this project's own
+  upgraded - a real false-positive found investigating this project's own
   `--deps` output.
 
 ### Changed

@@ -57,7 +57,7 @@ var goldenFindings = []core.Finding{
 		Fix:      "Upgrade example.com/pkg past the vulnerable range.",
 		File:     "go.sum",
 		Category: "dependencies",
-		Context:  "no severity information available from OSV.dev for this vulnerability — defaulted to Medium",
+		Context:  "no severity information available from OSV.dev for this vulnerability - defaulted to Medium",
 	},
 }
 

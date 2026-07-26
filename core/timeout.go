@@ -38,7 +38,7 @@ func RunAnalyzer(a Analyzer, file FileContext) []Finding {
 	case res := <-ch:
 		return res.findings
 	case <-time.After(AnalyzerTimeout):
-		fmt.Fprintf(os.Stderr, "⚠️  analyzer %q did not finish on %s within %s — skipped for this file\n", a.Name(), file.Path, AnalyzerTimeout)
+		fmt.Fprintf(os.Stderr, "⚠️  analyzer %q did not finish on %s within %s - skipped for this file\n", a.Name(), file.Path, AnalyzerTimeout)
 		return nil
 	}
 }

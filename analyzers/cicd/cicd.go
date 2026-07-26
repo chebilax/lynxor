@@ -1,7 +1,7 @@
 // Package cicd implements Lynxor's Phase 3 GitHub Actions detection
 // rules: overly broad workflow permissions, actions pinned to a mutable
 // branch ref instead of a version/SHA, and secrets echoed into build logs.
-// Hardcoded secret values in a workflow file need no rule here — a
+// Hardcoded secret values in a workflow file need no rule here - a
 // workflow is just YAML text, so analyzers/secrets already scans it via
 // the same core.Scanner pass, tagged Category "secrets".
 package cicd
@@ -30,7 +30,7 @@ func (a *Analyzer) Run(file core.FileContext) []core.Finding {
 
 	var doc yaml.Node
 	if err := yaml.Unmarshal(file.Content, &doc); err != nil {
-		// Not valid YAML (or empty) — nothing to analyze, not a scan error.
+		// Not valid YAML (or empty) - nothing to analyze, not a scan error.
 		return nil
 	}
 	if len(doc.Content) == 0 {
@@ -51,8 +51,8 @@ func isWorkflowFile(path string) bool {
 // walk recurses through the YAML tree looking for specific key names
 // (permissions, uses, run) wherever they appear, rather than modeling the
 // full workflow/job/step schema. None of the three checks need to know
-// whether a match is at the workflow level or nested in a specific job —
-// "permissions: write-all" is exactly as risky either place — so a schema
+// whether a match is at the workflow level or nested in a specific job -
+// "permissions: write-all" is exactly as risky either place - so a schema
 // walk would add structure this analyzer doesn't use.
 func walk(node *yaml.Node, path string, findings *[]core.Finding) {
 	if node.Kind == yaml.MappingNode {
@@ -83,7 +83,7 @@ func walk(node *yaml.Node, path string, findings *[]core.Finding) {
 
 // checkPermissions flags the literal "write-all" shorthand. A per-scope
 // map (e.g. `permissions: {contents: write}`) is deliberately not
-// evaluated here — judging which scopes are "too broad" for a given
+// evaluated here - judging which scopes are "too broad" for a given
 // workflow's actual needs is exactly the kind of ambiguous, context-
 // dependent call vision.md's Non-Goals rule out ("si une analyse est...
 // ambiguë, elle est hors scope").
@@ -98,12 +98,12 @@ func checkPermissions(value *yaml.Node, path string) *core.Finding {
 var mutableRefPattern = regexp.MustCompile(`^([^@\s]+)@(main|master)$`)
 
 // checkUses flags an action pinned to a mutable branch ref instead of a
-// version tag or commit SHA — the maintainer (or anyone who compromises
+// version tag or commit SHA - the maintainer (or anyone who compromises
 // their account) can change what code runs in your CI, with access to
 // your secrets, without you ever changing a line in your own repo.
 //
 // False positive this rule doesn't try to exclude: a first-party action
-// from your own organization, referencing your own trusted main branch —
+// from your own organization, referencing your own trusted main branch -
 // technically still "unpinned", but the supply-chain risk this rule cares
 // about doesn't apply the same way to code you already control. Not
 // distinguished here: there's no reliable signal in a single workflow
@@ -129,10 +129,10 @@ var echoSecretPattern = regexp.MustCompile(`(?i)^\s*(echo|print|printf|cat)\b.*\
 //
 // The pattern requires "}}" immediately after the secret name, so a
 // boolean presence check like `echo "token set: ${{ secrets.TOKEN != ”
-// }}"` does NOT match — confirmed with a synthetic fixture, not assumed.
+// }}"` does NOT match - confirmed with a synthetic fixture, not assumed.
 // A real, undetected gap instead: assigning the secret to a shell
 // variable on one line and echoing that variable on another (`TOKEN="${{
-// secrets.TOKEN }}"` then `echo $TOKEN`) — this line-based check has no
+// secrets.TOKEN }}"` then `echo $TOKEN`) - this line-based check has no
 // notion of shell variable flow across lines, so it won't connect the two.
 func checkRun(value *yaml.Node, path string) []core.Finding {
 	if value.Kind != yaml.ScalarNode {
@@ -161,13 +161,13 @@ var (
 		severity: core.High,
 		title:    "Workflow grants write-all permissions",
 		message:  "This workflow's GITHUB_TOKEN has write access to every scope (contents, packages, deployments, etc.). A compromised action or a malicious PR that reaches this workflow can use that token to push code, publish packages, or modify releases.",
-		fix:      "Replace write-all with the specific scopes this workflow actually needs (e.g. contents: read, pull-requests: write) — GitHub Actions defaults every unlisted scope to none.",
+		fix:      "Replace write-all with the specific scopes this workflow actually needs (e.g. contents: read, pull-requests: write) - GitHub Actions defaults every unlisted scope to none.",
 	}
 	unpinnedActionRule = rule{
 		id:       "cicd.unpinned_action",
 		severity: core.Medium,
 		title:    "Action pinned to a mutable branch ref",
-		message:  "This action is referenced by branch name (@main/@master) instead of a version tag or commit SHA. Whoever controls that branch — the maintainer, or anyone who compromises their account — can change what code runs in this workflow, with access to its secrets, at any time.",
+		message:  "This action is referenced by branch name (@main/@master) instead of a version tag or commit SHA. Whoever controls that branch - the maintainer, or anyone who compromises their account - can change what code runs in this workflow, with access to its secrets, at any time.",
 		fix:      "Pin to a release tag (@v4) or, for maximum safety, a full commit SHA (@a1b2c3...).",
 	}
 	echoSecretRule = rule{

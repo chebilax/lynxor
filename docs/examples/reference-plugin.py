@@ -79,7 +79,7 @@ def main():
                         "id": "example_marker_found",
                         "severity": "MEDIUM",
                         "title": "Reference plugin test marker found",
-                        "message": "This is the reference plugin's own test marker, not a real secret — it exists only to prove the plugin protocol round-trips a finding correctly.",
+                        "message": "This is the reference plugin's own test marker, not a real secret - it exists only to prove the plugin protocol round-trips a finding correctly.",
                         "fix": "Nothing to fix; this is a protocol test fixture.",
                         "line": i,
                         "context": f"configured args: {CONFIG}" if CONFIG else "",

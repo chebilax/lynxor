@@ -7,7 +7,7 @@ type FileContext struct {
 }
 
 // Analyzer is the plugin boundary. The scan engine never hardcodes a
-// detection rule directly — every rule lives behind this interface.
+// detection rule directly - every rule lives behind this interface.
 type Analyzer interface {
 	Name() string
 	Run(file FileContext) []Finding

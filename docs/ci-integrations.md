@@ -1,14 +1,14 @@
 # CI integrations beyond GitHub Actions
 
-The [GitHub Action](../README.md#github-action) (`action.yml`) is the only integration Lynxor publishes as a versioned, installable unit. For GitLab CI and Jenkins, this page is a documented copy-paste snippet instead — not a published GitLab CI/CD Component or a Jenkins Shared Library.
+The [GitHub Action](../README.md#github-action) (`action.yml`) is the only integration Lynxor publishes as a versioned, installable unit. For GitLab CI and Jenkins, this page is a documented copy-paste snippet instead - not a published GitLab CI/CD Component or a Jenkins Shared Library.
 
-**Why a snippet, not a published artifact, for these two**: a GitLab CI/CD Component only appears in the GitLab.com catalog if it's released from a project hosted *on* gitlab.com with its own semver tags and release pipeline — Lynxor's canonical repo is on GitHub, so publishing one would mean standing up and maintaining a second, mirrored hosting location indefinitely. A Jenkins Shared Library is real, ongoing Groovy code to maintain in a project that's otherwise 100% Go. Both are a bigger commitment than "pure packaging" — a snippet gets the same `diff`/`scan --format json` capability with zero new infrastructure. Revisit either if real usage demands it.
+**Why a snippet, not a published artifact, for these two**: a GitLab CI/CD Component only appears in the GitLab.com catalog if it's released from a project hosted *on* gitlab.com with its own semver tags and release pipeline - Lynxor's canonical repo is on GitHub, so publishing one would mean standing up and maintaining a second, mirrored hosting location indefinitely. A Jenkins Shared Library is real, ongoing Groovy code to maintain in a project that's otherwise 100% Go. Both are a bigger commitment than "pure packaging" - a snippet gets the same `diff`/`scan --format json` capability with zero new infrastructure. Revisit either if real usage demands it.
 
-**Validation gap, stated plainly**: unlike `action.yml` (proven end-to-end by `.github/workflows/lynxor-self-check.yml` against real GitHub Actions runs — see ADR 0011), neither snippet below has run on an actual GitLab or Jenkins instance. There's no such instance in this project's CI. Treat them as reviewed-but-unrun; if something's off, it'll surface as a real user report, not as a bug this repo's own CI would have caught.
+**Validation gap, stated plainly**: unlike `action.yml` (proven end-to-end by `.github/workflows/lynxor-self-check.yml` against real GitHub Actions runs - see ADR 0011), neither snippet below has run on an actual GitLab or Jenkins instance. There's no such instance in this project's CI. Treat them as reviewed-but-unrun; if something's off, it'll surface as a real user report, not as a bug this repo's own CI would have caught.
 
 ## GitLab CI
 
-> ⚠️ **Not validated against a real GitLab instance.** Reviewed and syntax-checked, not run — see the validation gap note above.
+> ⚠️ **Not validated against a real GitLab instance.** Reviewed and syntax-checked, not run - see the validation gap note above.
 
 ```yaml
 lynxor:
@@ -42,15 +42,15 @@ lynxor:
 
 Notes:
 
-- Fetch depth: GitLab's default shallow clone (`GIT_DEPTH`) can leave `CI_MERGE_REQUEST_DIFF_BASE_SHA` unresolvable in `.git` locally. Set `GIT_DEPTH: "0"` in this job's `variables:` (or project-wide in CI/CD settings) if `lynxor diff` reports it can't find the base commit — same underlying issue `fetch-depth: 0` solves for the GitHub Action (ADR 0011).
+- Fetch depth: GitLab's default shallow clone (`GIT_DEPTH`) can leave `CI_MERGE_REQUEST_DIFF_BASE_SHA` unresolvable in `.git` locally. Set `GIT_DEPTH: "0"` in this job's `variables:` (or project-wide in CI/CD settings) if `lynxor diff` reports it can't find the base commit - same underlying issue `fetch-depth: 0` solves for the GitHub Action (ADR 0011).
 - `artifacts: when: always` mirrors the GitHub Action's `if: !cancelled()` on its upload step: the report should still be available after a failing job, not only on success.
-- No `--deps`/`--plugin` equivalent on the merge-request branch of this snippet, for the same reason `diff` doesn't support them on the CLI itself (see README) — only the push/default-branch branch passes `--format json` and could add `--deps` there.
+- No `--deps`/`--plugin` equivalent on the merge-request branch of this snippet, for the same reason `diff` doesn't support them on the CLI itself (see README) - only the push/default-branch branch passes `--format json` and could add `--deps` there.
 
 ## Jenkins (declarative Jenkinsfile)
 
-> ⚠️ **Not validated against a real Jenkins instance.** Reviewed and researched against Jenkins/plugin docs, not run — see the validation gap note above.
+> ⚠️ **Not validated against a real Jenkins instance.** Reviewed and researched against Jenkins/plugin docs, not run - see the validation gap note above.
 
-Requires a Multibranch Pipeline job with the appropriate SCM source plugin configured (GitHub Branch Source, GitLab Branch Source, Bitbucket Branch Source, ...) — that plugin is what populates `CHANGE_ID`/`CHANGE_TARGET`. Jenkins has no built-in concept of a pull/merge request outside of that plugin.
+Requires a Multibranch Pipeline job with the appropriate SCM source plugin configured (GitHub Branch Source, GitLab Branch Source, Bitbucket Branch Source, ...) - that plugin is what populates `CHANGE_ID`/`CHANGE_TARGET`. Jenkins has no built-in concept of a pull/merge request outside of that plugin.
 
 ```groovy
 stage('Lynxor') {
@@ -83,5 +83,5 @@ stage('Lynxor') {
 
 Notes:
 
-- This Multibranch job needs a checkout depth deep enough for `git merge-base` to find a common ancestor — Jenkins' own shallow-clone default varies by SCM plugin; if `git merge-base` fails, increase it (or disable shallow clone) the same way `fetch-depth: 0` does for the GitHub Action.
-- Unlike the GitHub Action's install step (ADR 0011), there's no "unresolvable synthetic commit" risk here: `lynxor diff` reads whatever's already in the local `.git` object database, and both PR discovery strategies leave a real, locally-present commit for `env.GIT_COMMIT` to point to. What differs between strategies is which commit that is: the Branch Source plugin can be configured to check out either the raw PR head or a Jenkins-built merge of the PR into its target ("Merge Commit" strategy) — know which one your Multibranch job uses, since `lynxor diff` will report against whichever `env.GIT_COMMIT` actually is.
+- This Multibranch job needs a checkout depth deep enough for `git merge-base` to find a common ancestor - Jenkins' own shallow-clone default varies by SCM plugin; if `git merge-base` fails, increase it (or disable shallow clone) the same way `fetch-depth: 0` does for the GitHub Action.
+- Unlike the GitHub Action's install step (ADR 0011), there's no "unresolvable synthetic commit" risk here: `lynxor diff` reads whatever's already in the local `.git` object database, and both PR discovery strategies leave a real, locally-present commit for `env.GIT_COMMIT` to point to. What differs between strategies is which commit that is: the Branch Source plugin can be configured to check out either the raw PR head or a Jenkins-built merge of the PR into its target ("Merge Commit" strategy) - know which one your Multibranch job uses, since `lynxor diff` will report against whichever `env.GIT_COMMIT` actually is.
