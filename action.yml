@@ -1,9 +1,5 @@
-name: 'Lynxor'
-description: >
-  Security sanity check for git repos: secrets, Docker, CI/CD, and
-  dependency vulnerabilities. Runs `lynxor diff` on a pull request
-  (reports only what the PR introduces or fixes), or `lynxor scan`
-  otherwise (reports the repo's absolute score).
+name: 'Lynxor Security Scan'
+description: 'Security sanity check for Git repos: secrets, Docker, CI/CD, and dependency vulnerabilities.'
 author: 'chebilax'
 branding:
   icon: 'shield'
