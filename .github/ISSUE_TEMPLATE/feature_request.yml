@@ -1,0 +1,27 @@
+name: Feature request
+description: Something Lynxor doesn't do yet that you think it should.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        See [vision.md](https://github.com/chebilax/lynxor/blob/main/docs/vision.md) for what this project is (and deliberately isn't) trying to be, and [docs/roadmap-long-term.md](https://github.com/chebilax/lynxor/blob/main/docs/roadmap-long-term.md) for directions already considered -- may save you writing up something already ruled out for a stated reason.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that Lynxor doesn't support today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What would you want Lynxor to do instead? A CLI flag, a new finding, a new output field -- as concrete as you can make it.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Can you work around this today some other way? Why isn't that enough?

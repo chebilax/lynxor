@@ -1,0 +1,52 @@
+name: Bug report
+description: Something Lynxor did wrong -- a crash, unexpected output, or an incorrect finding.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A missed secret or an incorrect finding is a bug too -- use this template for those as well, not just crashes.
+
+        Found a security vulnerability in Lynxor itself (not a detection accuracy issue)? Please use [private vulnerability reporting](https://github.com/chebilax/lynxor/security/advisories/new) instead -- see [SECURITY.md](https://github.com/chebilax/lynxor/blob/main/SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: Lynxor version
+      description: Output of `lynxor --version`.
+      placeholder: "v1.2.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repo
+    attributes:
+      label: Repo tested
+      description: A public repo URL, or -- if it's private -- enough to reproduce (language, approximate size, the specific file/pattern involved).
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command run
+      description: The exact `lynxor` command, including flags.
+      placeholder: "lynxor scan . --full-history --deps"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Output obtained
+      description: Paste the actual output (or the relevant part of it).
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: OS, install method (Homebrew/npm/go install/source), or anything else that seems relevant.
