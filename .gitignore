@@ -38,3 +38,7 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Local AI-tooling directory (skills, prompts, session state) -- not
+# meant to stay publicly tracked.
+/.claude/

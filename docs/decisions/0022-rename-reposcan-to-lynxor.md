@@ -17,7 +17,7 @@ Séquencement confirmé avec l'utilisateur avant toute exécution :
 
 Même mécanique que le premier renommage : `git grep -lI -i "reposcan"` pour inventorier (63 fichiers touchés, 3 renommages de fichier/dossier), remplacement en plusieurs passes (`RepoScan` → `Lynxor`, `reposcan` → `lynxor`, puis une passe `REPOSCAN` → `LYNXOR` découverte nécessaire après coup — une variable d'environnement `REPOSCAN_INSTALL_VERSION` dans `npm/scripts/install.js` et l'ADR 0021 avaient été manqués par la vérification initiale, qui n'avait pas retesté après la création de ces fichiers dans la session), puis re-vérification globale jusqu'à ce que seul le fichier golden (voir plus bas) reste.
 
-Fichiers/dossiers renommés : `.claude/skills/reposcan-finding/` → `lynxor-finding/`, `.github/workflows/reposcan-self-check.yml` → `lynxor-self-check.yml`, `npm/bin/reposcan.js` → `npm/bin/lynxor.js`.
+Fichiers/dossiers renommés : le dossier d'outillage interne `reposcan-finding/` → `lynxor-finding/`, `.github/workflows/reposcan-self-check.yml` → `lynxor-self-check.yml`, `npm/bin/reposcan.js` → `npm/bin/lynxor.js`.
 
 ## Décision : le champ `hello_ack` du protocole plugin (`reposcan_version` → `lynxor_version`) est renommé aussi
 
