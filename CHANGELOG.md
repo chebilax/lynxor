@@ -8,6 +8,8 @@ user-visible impact, not just code churn.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-26
+
 ### Fixed
 - `githistory`: a secret introduced then later removed still reports two
   findings (two real, independent diff events — not merged), but each now
@@ -17,6 +19,10 @@ user-visible impact, not just code churn.
 
 ### Added
 - `CONTRIBUTING.md` and this changelog.
+- Test coverage extended on `analyzers/plugin` (0%→92.2%),
+  `analyzers/githistory` (63.4%→83.9%), `analyzers/dependencies`
+  (54.7%→69.9%), `core` (65.7%→92.6%), and `cli/diff.go` (part of
+  `cli`'s 10.2%→19.5%).
 
 ### Changed
 - Clarified `--help` output on the root command and `lynxor diff`: which
