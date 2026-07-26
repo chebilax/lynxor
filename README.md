@@ -1,6 +1,6 @@
 # 🛡️ Lynxor
 
-**v1.0.0** - the full [vision.md](docs/vision.md) roadmap (Phases 1–5) is implemented: secrets, git history, Docker, CI/CD, dependency vulnerabilities, a diff mode for PRs, an external plugin system, and CLI/JSON/HTML reporting.
+The full [vision.md](docs/vision.md) roadmap (Phases 1–5) is implemented: secrets, git history, Docker, CI/CD, dependency vulnerabilities, a diff mode for PRs, an external plugin system, and CLI/JSON/HTML reporting - plus a growing set of post-v1.0 additions (see Status below).
 
 Lynxor is a 10-second security sanity check for Git repositories. It doesn't analyze code quality - it detects real-world security mistakes that leak data or break production: committed secrets, exposed keys, tokens hardcoded in source, risky Dockerfile patterns, CI/CD workflow misconfigurations, and known-vulnerable dependencies.
 
@@ -19,10 +19,10 @@ brew install lynxor
 
 Builds from source (`depends_on "go" => :build`), same reasoning as the GitHub Action below - deliberately not switched to precompiled binaries, so this stays hand-tested (`brew install --build-from-source` + `brew test`) rather than trusting a pipeline blindly. See [chebilax/homebrew-lynxor](https://github.com/chebilax/homebrew-lynxor).
 
-**`go install`**, if you already have Go 1.24+:
+**`go install`**, if you already have Go 1.25+:
 
 ```bash
-go install github.com/chebilax/lynxor@v1.1.2   # or @latest, or a commit SHA
+go install github.com/chebilax/lynxor@v1.2.0   # or @latest, or a commit SHA
 ```
 
 `lynxor --version` will print `dev` this way - this project's version string is only set via `-ldflags` (see below), which plain `go install` never passes. Use Homebrew, npm, a precompiled binary, or `go build` from a clone (all inject it correctly) if the version string matters to you.
@@ -108,6 +108,12 @@ External plugins run as a separate process (never in-process Go code - see [docs
 
 A plugin that crashes, times out (5s per file), or sends a malformed response is dropped for the rest of the scan with a warning - it never fails the whole scan, and one misbehaving plugin has no effect on any other. A plugin only ever receives file bytes, never a path it could resolve itself; see [docs/examples/reference-plugin.py](docs/examples/reference-plugin.py) for a complete, runnable reference implementation in Python (the protocol has nothing Go-specific about it).
 
+`--plugin-arg` passes configuration to a loaded plugin, addressed by the plugin's own self-declared name from its handshake (not by flag position, which isn't guaranteed stable across repeatable flags):
+
+```bash
+./lynxor scan . --plugin /path/to/my-plugin --plugin-arg my-plugin:api-key=xyz
+```
+
 ### Flags reference
 
 `lynxor scan [path]` - defaults to `.` if `path` is omitted:
@@ -118,6 +124,7 @@ A plugin that crashes, times out (5s per file), or sends a malformed response is
 | `--no-history` | off | Skip git history scanning entirely, working tree only. Mutually exclusive with `--full-history`. |
 | `--deps` | off | Check `go.sum`/`requirements.txt`/`package-lock.json` against OSV.dev - the only flag here that touches the network. |
 | `--plugin <path>` | none | Run an external plugin executable alongside the built-in rules. Repeatable. |
+| `--plugin-arg <name:key=value>` | none | Configuration for a loaded plugin, addressed by its self-declared name. Repeatable. |
 | `--format <cli\|json\|html>` | `cli` | Output format. `json` and `html` both still respect the exit-code-70 threshold below. |
 
 `lynxor diff <ref-a> <ref-b>` takes no flags - see the note above on what it doesn't cover yet.
@@ -129,9 +136,9 @@ Every mode that produces a score (`scan` in any `--format`) exits with code 1 if
 A composite action (`action.yml` at the repo root) wraps the CLI - no new checks, pure packaging:
 
 ```yaml
-- uses: chebilax/lynxor@main
+- uses: chebilax/lynxor@v1.2.0   # pin to a release tag (see releases); @main tracks latest, less stable
   with:
-    fail-on-new: true   # pin to a release tag instead of @main once one exists
+    fail-on-new: true
     deps: true          # optional: pass --deps to scan runs (ignored on pull_request)
 ```
 
@@ -255,7 +262,7 @@ Phase 4 - plugin system (`--plugin`): external detection rules run as a separate
 
 Phase 5 - reporting: `--format json` for machine-readable output, and `--format html` for a self-contained dashboard with a per-category score breakdown alongside the total. This closes vision.md's roadmap to v1.0.
 
-Post-v1.0 - a GitHub Action (see above) is the first item off [docs/roadmap-long-term.md](docs/roadmap-long-term.md): pure packaging around `diff`/`scan --format json`, no new CLI feature. `--deps` also gained `package-lock.json` (npm), `lockfileVersion` 2/3 only (npm 7+) - `yarn.lock`/`pnpm-lock.yaml` are separate, deliberately deferred.
+Post-v1.0 - a GitHub Action (see above) was the first item off [docs/roadmap-long-term.md](docs/roadmap-long-term.md): pure packaging around `diff`/`scan --format json`, no new CLI feature. `--deps` also gained `package-lock.json` (npm), `lockfileVersion` 2/3 only (npm 7+) - `yarn.lock`/`pnpm-lock.yaml` are separate, deliberately deferred. `core.RepoAnalyzer` unified repo-level checks (Dependabot config, git-history) under one interface; `--plugin-arg` lets a `--plugin` receive configuration directly, addressed by its self-declared name. Distribution grew beyond `go install`/Homebrew: every tagged release now publishes precompiled binaries (GoReleaser) and an npm package (`npm install -g lynxor`, see Install above).
 
 See [vision.md](docs/vision.md) for the full v1.0 roadmap, [docs/roadmap-long-term.md](docs/roadmap-long-term.md) for what's planned after it, [docs/decisions/](docs/decisions/) for design rationale, [docs/testing.md](docs/testing.md) for the test corpus and exit criteria, and [docs/benchmarks.md](docs/benchmarks.md) for the timing history behind them.
 
