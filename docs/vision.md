@@ -1,93 +1,93 @@
 # 🛡️ Lynxor — Repository Security Auditor
 
-## 📌 Pitch en une phrase
+## 📌 One-sentence pitch
 
 > **Lynxor does not analyze code quality. It detects real-world security mistakes that leak data or break production.**
 
-Version plus courte, pour un README ou un tagline GitHub :
+Shorter version, for a README or a GitHub tagline:
 
 > Lynxor is a 10-second security sanity check for Git repositories.
 
-Ces deux formulations font ce que "git status de la sécurité" ne faisait pas complètement : elles excluent explicitement SonarQube du champ de comparaison au lieu de laisser le lecteur faire le rapprochement lui-même.
+Both formulations do something a "security git status" tagline didn't quite manage: they explicitly rule SonarQube out of the comparison instead of leaving the reader to draw that line themselves.
 
-## 🧭 Comment Lynxor doit se ressentir
+## 🧭 How Lynxor should feel
 
-- Lancé sur n'importe quel repo, sans setup
-- Résultat en quelques secondes
-- Compréhensible sans lire la doc
-- Chaque finding est actionnable immédiatement
+- Runs on any repo, no setup
+- Results in seconds
+- Understandable without reading the docs
+- Every finding is immediately actionable
 
-Si une feature contredit un de ces quatre points, elle est probablement hors scope (voir Non-Goals ci-dessous).
+If a feature contradicts any of these four points, it's probably out of scope (see Non-Goals below).
 
-## 🎯 Pour qui ?
+## 🎯 Who is this for?
 
-| Persona | Besoin | Moment d'usage |
+| Persona | Need | When |
 |---|---|---|
-| Dev solo / petite équipe | Vérifier vite qu'un repo n'a pas de fuite avant de push/open-source | `pre-commit`, avant de publier un repo |
-| Lead tech / DevOps | Gate de sécurité simple en CI, sans configurer un outil enterprise | Pipeline CI/CD |
-| Mainteneur open source | Rassurer les contributeurs et utilisateurs sur la santé du repo | Badge de score dans le README |
+| Solo dev / small team | Quickly confirm a repo has no leaks before pushing/open-sourcing it | `pre-commit`, before publishing a repo |
+| Tech lead / DevOps | A simple security gate in CI, without configuring an enterprise tool | CI/CD pipeline |
+| Open source maintainer | Reassure contributors and users about the repo's health | A score badge in the README |
 
-Sans persona clair, un outil "développeur" finit vite comme un outil "pour personne". Ça vaut le coup de trancher lequel de ces trois tu sers en premier — probablement le dev solo, vu ton MVP.
+Without a clear persona, a "developer" tool quickly becomes a tool "for no one." It's worth deciding which of these three you serve first — probably the solo dev, given the MVP.
 
-## 🧠 Philosophie (inchangée, c'est le cœur du projet)
+## 🧠 Philosophy (unchanged, this is the project's core)
 
-1. **Signal > bruit** — pas 500 warnings, seulement de l'actionnable.
-2. **Explicable** — chaque finding dit *pourquoi* c'est dangereux et *comment* corriger.
-3. **Extensible** — core minimal, règles en plugins.
+1. **Signal > noise** — not 500 warnings, only what's actionable.
+2. **Explainable** — every finding says *why* it's dangerous and *how* to fix it.
+3. **Extensible** — minimal core, rules as plugins.
 
-## 🔥 Différenciation
+## 🔥 Differentiation
 
-| Outil | Objectif | Limite |
+| Tool | Goal | Limitation |
 |---|---|---|
-| Gitleaks | Secrets uniquement | Pas de score global, pas d'autres catégories |
-| SonarQube | Analyse statique complète | Lourd à installer/configurer, pensé pour l'entreprise |
-| Snyk | Vulnérabilités de dépendances | Payant à l'échelle, pas centré repo-santé |
-| **Lynxor** | **Health check rapide et actionnable** | À prouver : doit éviter de devenir "SonarQube v2" |
+| Gitleaks | Secrets only | No overall score, no other categories |
+| SonarQube | Full static analysis | Heavy to install/configure, built for the enterprise |
+| Snyk | Dependency vulnerabilities | Paid at scale, not repo-health-centered |
+| **Lynxor** | **Fast, actionable health check** | Still to prove: must avoid becoming "SonarQube v2" |
 
-**Le risque principal du projet** : la roadmap (v0.1 à v0.6) couvre à peu près tout ce que fait SonarQube. Le vrai différenciateur n'est pas la liste de checks, c'est l'UX : vitesse, lisibilité, zéro config. Garder ça comme boussole à chaque feature ajoutée — si une feature ralentit le scan ou complexifie la config, elle va à l'encontre de la promesse.
+**The project's main risk**: the roadmap (v0.1 to v0.6) covers roughly everything SonarQube does. The real differentiator isn't the list of checks, it's the UX: speed, readability, zero config. Keep that as the compass for every feature added — if a feature slows the scan down or complicates the config, it works against the promise.
 
 ### 🚫 Non-Goals
 
-Sans cette section, la roadmap dérive naturellement vers "mini SonarQube" — chaque nouvelle catégorie de check ressemble à une feature légitime prise isolément, mais l'addition finit par recréer l'outil qu'on voulait éviter. Ces exclusions doivent être aussi visibles que la roadmap elle-même :
+Without this section, the roadmap naturally drifts toward "mini SonarQube" — each new check category looks like a legitimate feature in isolation, but the sum ends up recreating the very tool this was meant to avoid. These exclusions need to be just as visible as the roadmap itself:
 
-Lynxor ne cherchera **pas** à :
+Lynxor will **not** try to:
 
-- Remplacer SonarQube ou les outils SAST
-- Fournir une analyse statique profonde (AST, dataflow)
-- Détecter chaque vulnérabilité possible
-- Viser zéro faux positif à tout prix
-- Exiger une configuration complexe
+- Replace SonarQube or SAST tools
+- Provide deep static analysis (AST, dataflow)
+- Detect every possible vulnerability
+- Aim for zero false positives at all costs
+- Require complex configuration
 
-**Règle d'arbitrage** : si une analyse est lente, bruyante ou ambiguë, elle est hors scope — même si elle est techniquement faisable.
+**Tie-breaker rule**: if a check is slow, noisy, or ambiguous, it's out of scope — even if it's technically feasible.
 
-## 🏗️ Architecture globale
+## 🏗️ Overall architecture
 
 ```
 lynxor
 │
 ├── core/            → scanner engine, git reader, report generator, scoring engine
 ├── analyzers/        → secrets, git-history, dependencies, docker, ci, code-smells
-├── plugins/          → règles externes
-├── cli/              → commandes
+├── plugins/          → external rules
+├── cli/              → commands
 └── output/           → cli, json, html
 ```
 
-## ⚙️ Roadmap produit
+## ⚙️ Product roadmap
 
-### Phase 1 — MVP : Secrets Scanner (1–2 semaines)
-Détection : `.env` committé, clés AWS, tokens GitHub, clés privées (`.pem`, `.key`, `id_rsa`), tokens Stripe/Slack/Discord/OpenAI, JWT brut, secrets dans `.yaml`/`.json`/`.env`/`.config`.
-Features : scan fichiers, règles regex, respect du `.gitignore`, output CLI simple, score basique.
+### Phase 1 — MVP: Secrets Scanner (1–2 weeks)
+Detection: committed `.env`, AWS keys, GitHub tokens, private keys (`.pem`, `.key`, `id_rsa`), Stripe/Slack/Discord/OpenAI tokens, raw JWTs, secrets in `.yaml`/`.json`/`.env`/`.config`.
+Features: file scanning, regex rules, `.gitignore` respected, simple CLI output, basic score.
 
-**Critère de sortie du MVP** : capable de scanner un repo réel en < 5 secondes avec zéro faux positif majeur sur un set de test de ~20 repos publics connus. Sans ce critère chiffré, "MVP" reste flou.
+**MVP exit criterion**: able to scan a real repo in < 5 seconds with zero major false positives across a test set of ~20 known public repos. Without this measurable criterion, "MVP" stays vague.
 
 ### Phase 2 — Git History + Docker
-- Git History Analyzer : secrets supprimés mais toujours présents dans l'historique (commits, branches supprimées, hash associé).
-- Docker Analyzer : `USER root`, tags `latest`, `ADD .` au lieu de `COPY`, secrets dans `ENV`, absence d'utilisateur non-root.
+- Git History Analyzer: secrets removed but still present in history (commits, deleted branches, associated hash).
+- Docker Analyzer: `USER root`, `latest` tags, `ADD .` instead of `COPY`, secrets in `ENV`, no non-root user.
 
 ### Phase 3 — Dependencies + CI/CD
-- Dependency Scanner via OSV API et GitHub Advisory DB (Go, Python, puis Node en option).
-- CI/CD Analyzer : permissions trop larges (`write-all`), actions non pinées (`@main`), secrets exposés dans les workflows, absence de Dependabot.
-- **Security Diff Mode** — la feature qui change le positionnement de "scanner" à "outil de review sécurité" :
+- Dependency Scanner via the OSV API and the GitHub Advisory DB (Go, Python, then Node optionally).
+- CI/CD Analyzer: overly broad permissions (`write-all`), unpinned actions (`@main`), secrets exposed in workflows, no Dependabot.
+- **Security Diff Mode** — the feature that shifts the positioning from "scanner" to "security review tool":
 
 ```
 lynxor diff main feature-branch
@@ -99,23 +99,23 @@ lynxor diff main feature-branch
 ✔️ FIXED: .env removed from repo
 ```
 
-C'est particulièrement fort en CI/CD sur une pull request : au lieu d'un score statique du repo entier, on montre exactement ce que *cette* PR introduit ou corrige. C'est le genre de feature qui donne une raison concrète d'ajouter Lynxor à un pipeline plutôt que de le lancer une fois et d'oublier.
+This is especially strong in CI/CD on a pull request: instead of a static score for the entire repo, it shows exactly what *this* PR introduces or fixes. That's the kind of feature that gives a concrete reason to add Lynxor to a pipeline, rather than running it once and forgetting about it.
 
 ### Phase 4 — Plugin System
-Interface minimale :
+Minimal interface:
 ```go
 type Analyzer interface {
     Name() string
     Run(repo RepoContext) []Finding
 }
 ```
-Plugins externes envisageables : Terraform, manifests Kubernetes, analyse statique Python, règles enterprise custom.
+Possible external plugins: Terraform, Kubernetes manifests, Python static analysis, custom enterprise rules.
 
 ### Phase 5 — Reporting v1.0
-- Outputs : CLI coloré, JSON machine-readable, dashboard HTML.
-- Contenu : score de sécurité (0–100), breakdown par catégorie, liste des findings, niveaux de sévérité.
+- Outputs: colored CLI, machine-readable JSON, HTML dashboard.
+- Content: security score (0–100), per-category breakdown, findings list, severity levels.
 
-## 📊 Scoring système
+## 📊 Scoring system
 
 ```
 Secrets           10/10
@@ -129,18 +129,18 @@ TOTAL SCORE: 78/100
 GRADE: B
 ```
 
-### ⚠️ Principe de scoring
+### ⚠️ Scoring principle
 
-**Un seul problème critique doit dominer le score, pas s'additionner comme un problème mineur parmi d'autres.** Un secret exposé n'est pas "10 points en moins comme un `latest` tag Docker" — c'est un incident, et le score doit le refléter immédiatement.
+**A single critical problem must dominate the score, not just add up like one minor issue among others.** An exposed secret isn't "10 points off, same as a Docker `latest` tag" — it's an incident, and the score must reflect that immediately.
 
-Modèle indicatif à affiner en Phase 5, mais posé dès maintenant comme principe :
+Indicative model to refine in Phase 5, but laid down now as a principle:
 
-- 🔴 Critical (secret exposé, leak) → -40 à -100
-- 🟠 High (misconfiguration exploitable) → -15 à -40
-- 🟡 Medium → -5 à -15
-- 🟢 Low → -1 à -5
+- 🔴 Critical (exposed secret, leak) → -40 to -100
+- 🟠 High (exploitable misconfiguration) → -15 to -40
+- 🟡 Medium → -5 to -15
+- 🟢 Low → -1 to -5
 
-Sans cette hiérarchie explicite, un repo avec un secret AWS exposé mais peu d'autres findings pourrait afficher un score correct — ce qui détruirait la crédibilité de l'outil dès le premier vrai incident détecté.
+Without this explicit hierarchy, a repo with an exposed AWS secret but few other findings could still show a decent score — which would destroy the tool's credibility the first time it actually caught a real incident.
 
 ## 🖥️ CLI design
 
@@ -155,7 +155,7 @@ lynxor plugins list
 lynxor plugins install xyz
 ```
 
-## 📄 Exemple de sortie
+## 📄 Example output
 
 ```
 ❌ HIGH   - GitHub Token detected in commit a83f1c
@@ -185,38 +185,38 @@ plugins:
   - ci
 ```
 
-## 🧱 Stack technique
+## 🧱 Tech stack
 
-- **Go** — bon choix pour un CLI rapide, binaire unique, facile à distribuer
-- CLI : Cobra ou urfave/cli
-- Git : go-git
-- YAML (CI/CD Analyzer, Phase 3) : gopkg.in/yaml.v3 — pas de parseur YAML en stdlib, lib de référence de l'écosystème Go
-- Parallélisation : goroutines
-- Output : templating + JSON
-- HTTP : OSV / GitHub API
+- **Go** — a good choice for a fast CLI, single binary, easy to distribute
+- CLI: Cobra or urfave/cli
+- Git: go-git
+- YAML (CI/CD Analyzer, Phase 3): gopkg.in/yaml.v3 — no YAML parser in stdlib, the Go ecosystem's reference library
+- Parallelization: goroutines
+- Output: templating + JSON
+- HTTP: OSV / GitHub API
 
-## 🌍 Vision long terme
+## 🌍 Long-term vision
 
-Voir [docs/roadmap-long-term.md](docs/roadmap-long-term.md) pour les directions post-v1.0.
+See [docs/roadmap-long-term.md](docs/roadmap-long-term.md) for post-v1.0 directions.
 
-## 🧠 Positionnement mental
+## 🧠 Mental positioning
 
-Ne pense pas : *"je fais un scanner de sécurité."*
-Pense : *"je fais un outil de health check de sécurité pour développeurs."*
+Don't think: *"I'm building a security scanner."*
+Think: *"I'm building a security health-check tool for developers."*
 
 ---
 
-## ✍️ Historique des révisions
+## ✍️ Revision history
 
-**V2 (cette version)**
-- Pitch réécrit pour exclure explicitement la comparaison SonarQube plutôt que de la laisser implicite
-- Section **Non-Goals** ajoutée — le garde-fou le plus important contre la dérive "mini SonarQube"
-- **Security Diff Mode** ajouté en Phase 3 : change le positionnement de scanner ponctuel à outil de review, particulièrement fort en CI/CD sur PR
-- Principe de scoring cadré : un critique doit dominer le score, pas s'additionner à égalité avec des mineurs
-- Section "Comment Lynxor doit se ressentir" ajoutée en haut, comme boussole UX
+**V2 (this version)**
+- Pitch rewritten to explicitly rule out the SonarQube comparison rather than leaving it implicit
+- **Non-Goals** section added — the most important guardrail against "mini SonarQube" drift
+- **Security Diff Mode** added in Phase 3: shifts the positioning from a one-off scanner to a review tool, especially strong in CI/CD on a PR
+- Scoring principle framed: a critical issue must dominate the score, not add up as an equal among minor ones
+- "How Lynxor should feel" section added at the top, as a UX compass
 
 **V1**
-- Personas explicites (dev solo / lead tech / mainteneur OSS)
-- Risque de positionnement nommé (roadmap = périmètre SonarQube)
-- Critère de sortie du MVP chiffré
-- Reste (philosophie, architecture, stack, CLI design) inchangé — déjà solide dans le jet original
+- Explicit personas (solo dev / tech lead / OSS maintainer)
+- Positioning risk named (roadmap = SonarQube's scope)
+- Measurable MVP exit criterion
+- Everything else (philosophy, architecture, stack, CLI design) unchanged — already solid in the original draft

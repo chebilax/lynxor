@@ -1,30 +1,30 @@
 # Documentation
 
-**Pour utiliser Lynxor, le [README principal](../README.md) suffit** — installation, commandes, exemples de sortie.
+**To use Lynxor, the [main README](../README.md) is enough** — install, commands, example output.
 
-Ce qui suit documente le *pourquoi* derrière chaque décision d'architecture, au fil de la construction du projet. Utile si tu es curieux d'un choix précis ou si tu contribues au projet — pas nécessaire pour s'en servir.
+What follows documents the *why* behind each architecture decision, as the project was built. Useful if you're curious about a specific choice or contributing to the project — not required just to use it.
 
-## Vue d'ensemble
+## Overview
 
-- [`vision.md`](vision.md) — pitch, philosophie, non-goals, roadmap Phases 1-5 (close, v1.0)
-- [`roadmap-long-term.md`](roadmap-long-term.md) — directions post-v1.0 (GitHub Action, CI multi-plateforme, Homebrew : faites ; marketplace de plugins, extension VSCode : en pause faute de besoin réel identifié)
+- [`vision.md`](vision.md) — pitch, philosophy, non-goals, Phases 1-5 roadmap (closed, v1.0)
+- [`roadmap-long-term.md`](roadmap-long-term.md) — post-v1.0 directions (GitHub Action, multi-platform CI, Homebrew: done; plugin marketplace, VSCode extension: paused, no real need identified)
 
-## Comment le projet est testé
+## How the project is tested
 
-- [`testing.md`](testing.md) — corpus de test, critères de sortie mesurables
-- [`benchmarks.md`](benchmarks.md) — historique des mesures de perf, phase par phase
+- [`testing.md`](testing.md) — test corpus, measurable exit criteria
+- [`benchmarks.md`](benchmarks.md) — performance measurement history, phase by phase
 
-## Contrats techniques
+## Technical contracts
 
-- [`plugin-protocol.md`](plugin-protocol.md) — protocole JSON du système de plugins (process séparé, n'importe quel langage)
-- [`ci-integrations.md`](ci-integrations.md) — snippets GitLab CI / Jenkins (non testés en conditions réelles — voir l'avertissement en tête du fichier)
-- [`examples/reference-plugin.py`](examples/reference-plugin.py) — plugin de référence en Python
+- [`plugin-protocol.md`](plugin-protocol.md) — the plugin system's JSON protocol (separate process, any language)
+- [`ci-integrations.md`](ci-integrations.md) — GitLab CI / Jenkins snippets (not tested against a real instance — see the warning at the top of the file)
+- [`examples/reference-plugin.py`](examples/reference-plugin.py) — reference plugin in Python
 
-## Décisions d'architecture (ADR)
+## Architecture decisions (ADR)
 
-Chaque décision non triviale du projet est documentée au moment où elle est prise, pas reconstruite après coup. Voir [`decisions/`](decisions/) pour la liste complète, dans l'ordre chronologique.
+Every non-trivial decision in this project is documented at the moment it's made, not reconstructed after the fact. See [`decisions/`](decisions/) for the full list, in chronological order — written in French (not yet translated, unlike the rest of this documentation).
 
-## Contribuer
+## Contributing
 
-- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — le process réel (branche par feature, ADR, validation empirique, `make check`)
-- [`../CHANGELOG.md`](../CHANGELOG.md) — historique des versions
+- [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — the real process (branch per feature, ADRs, empirical validation, `make check`)
+- [`../CHANGELOG.md`](../CHANGELOG.md) — version history
